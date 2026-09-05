@@ -12,7 +12,7 @@ export default defineConfig({
         name: 'TCG — Horaires TAG Grenoble',
         short_name: 'TCG',
         description: 'Prochains passages en temps réel du réseau M (TAG) à Grenoble.',
-        theme_color: '#2563eb',
+        theme_color: '#f8fafc',
         background_color: '#f8fafc',
         display: 'standalone',
         start_url: '/',
