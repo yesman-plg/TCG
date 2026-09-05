@@ -4,6 +4,7 @@ import { useStops } from './hooks/useStops';
 import { useFavorites } from './hooks/useFavorites';
 import StopSearch from './components/StopSearch';
 import NearbyStops from './components/NearbyStops';
+import MapView from './components/MapView';
 import DepartureBoard from './components/DepartureBoard';
 import FavoriteRow from './components/FavoriteRow';
 import TrafficTab from './components/TrafficTab';
@@ -87,6 +88,12 @@ export default function App() {
             <section className="search-section">
               <StopSearch stops={stops} onSelect={setSelectedStop} />
             </section>
+
+            {!selectedStop && (
+              <section className="map-section">
+                <MapView stops={stops} onSelect={setSelectedStop} />
+              </section>
+            )}
 
             {!selectedStop && (
               <section className="nearby-section">
