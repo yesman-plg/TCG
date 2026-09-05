@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { getStopTimes } from '../api/mobilitesM';
 
-const REFRESH_MS = 30_000; // les positions GPS sont réactualisées côté réseau toutes les ~30s
+const REFRESH_MS = 15_000; // le réseau republie les positions GPS toutes les ~30s ;
+// on interroge un peu plus vite pour récupérer un changement le plus tôt possible
 
 /**
  * Interroge en continu les prochains passages d'un arrêt (toutes lignes confondues).
- * Se met à jour toutes les 30s tant que le composant est monté.
+ * Se met à jour toutes les 15s tant que le composant est monté.
  */
 export function useStopTimes(stopCode) {
   const [patterns, setPatterns] = useState(null);

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Star, X, Warning, CaretDown } from '@phosphor-icons/react';
 import { useStopTimes } from '../hooks/useStopTimes';
+import { useNow } from '../hooks/useNow';
 import { useRoutes } from '../hooks/useRoutes';
 import { useDisruptions } from '../hooks/useDisruptions';
 import { disruptionsForRoutes } from '../utils/disruptions';
@@ -46,6 +47,9 @@ export default function DepartureBoard({
   hideHeader = false,
 }) {
   const { patterns, error, loading } = useStopTimes(stop.code);
+  // Recalcule les décomptes ("3 min"...) toutes les 5s même sans nouvelle
+  // donnée réseau, pour qu'ils ne restent pas figés entre deux rafraîchissements.
+  useNow(5000);
   const { routesById } = useRoutes();
   const { disruptions } = useDisruptions();
   const [showAll, setShowAll] = useState(false);
