@@ -1,0 +1,248 @@
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --text: #1a1d23;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #2563eb;
+  --accent-contrast: #ffffff;
+  --realtime: #16a34a;
+  --delay: #d97706;
+  --error: #dc2626;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161a;
+    --surface: #1d2026;
+    --text: #e8eaed;
+    --muted: #9aa1ac;
+    --border: #2b2f36;
+    --accent: #4f8cff;
+    --accent-contrast: #0b0f19;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.app-header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.6rem;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.error {
+  color: var(--error);
+}
+
+.search-section {
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.stop-search input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.stop-search-results {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.stop-search-results button {
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  border-radius: 0.4rem;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.stop-search-results button:hover {
+  background: var(--bg);
+}
+
+.stop-city {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.favorites-section h2 {
+  font-size: 1.1rem;
+  margin: 2rem 0 1rem;
+}
+
+.favorites-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.departure-board {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.departure-board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.departure-board-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.departure-board-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.fav-btn,
+.close-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.fav-btn.active {
+  color: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.pattern-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pattern-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.line-badge {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  padding: 0.1rem 0.5rem;
+  border-radius: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.pattern-dest {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.times-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.time {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+.time.realtime .time-minutes {
+  color: var(--realtime);
+  font-weight: 600;
+}
+
+.time-clock {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.delay {
+  color: var(--delay);
+  font-size: 0.75rem;
+}
+
+.occupancy {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.show-more-btn {
+  margin-top: 0.75rem;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.app-footer {
+  margin-top: 3rem;
+  text-align: center;
+}
