@@ -25,9 +25,16 @@ export function naturalCompare(a, b) {
   return 0;
 }
 
-const MODE_ORDER = { TRAM: 0, BUS: 1 };
+// Les lignes Chrono (C1, C2… C14) sont les bus structurants du réseau M :
+// elles doivent apparaître juste après les trams, avant les autres bus/cars.
+const CHRONO_LINE = /^C\d/;
 
-/** Rang d'un mode de transport pour le tri (tram avant bus avant le reste). */
-export function modeRank(mode) {
-  return MODE_ORDER[mode] ?? 2;
+/**
+ * Catégorie d'affichage d'une ligne : 0 = tram, 1 = bus Chrono (C1, C2…),
+ * 2 = tout le reste (bus de proximité, lignes interurbaines, scolaires…).
+ */
+export function categoryRank(mode, shortName) {
+  if (mode === 'TRAM') return 0;
+  if (CHRONO_LINE.test(shortName || '')) return 1;
+  return 2;
 }
