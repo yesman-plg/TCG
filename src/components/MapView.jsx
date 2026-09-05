@@ -10,11 +10,12 @@ import { decodePolyline } from '../utils/polyline';
 // Centre par défaut du réseau (repris de la config "zone" de l'app officielle).
 const DEFAULT_CENTER = [45.189053, 5.724681];
 const DEFAULT_ZOOM = 14;
-const MIN_ZOOM_FOR_MARKERS = 13; // trop dézoomé = trop d'arrêts, on masque plutôt que de tout afficher
+const MIN_ZOOM_FOR_MARKERS = 15; // trop dézoomé = trop d'arrêts qui polluent la vue d'ensemble des lignes
 const MAX_MARKERS = 300;
 
 /**
- * Carte interactive du réseau (fond OpenStreetMap) : affiche les arrêts
+ * Carte interactive du réseau (fond épuré, façon "Positron", plutôt que le
+ * rendu OSM standard très chargé en couleurs/labels) : affiche les arrêts
  * visibles dans la zone actuelle sous forme de points cliquables. On ne
  * rend que les arrêts dans le cadre visible (recalculé au déplacement/zoom)
  * plutôt que les ~860 arrêts d'un coup, pour rester fluide.
@@ -41,10 +42,15 @@ export default function MapView({ stops, onSelect }) {
       center: DEFAULT_CENTER,
       zoom: DEFAULT_ZOOM,
     });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      {
+        attribution:
+          '&copy; <a href="https://www.esri.com">Esri</a>, HERE, Garmin, FAO, NOAA, USGS',
+        maxZoom: 19,
+        maxNativeZoom: 16, // le fournisseur ne détaille pas au-delà : Leaflet agrandit les tuiles z16
+      }
+    ).addTo(map);
 
     // Ordre d'ajout = ordre d'empilement : les tracés d'abord, les arrêts
     // par-dessus (comme sur la carte de l'app M).
@@ -65,8 +71,8 @@ export default function MapView({ stops, onSelect }) {
         if (count >= MAX_MARKERS) break;
         if (!bounds.contains([s.lat, s.lon])) continue;
         const marker = L.circleMarker([s.lat, s.lon], {
-          radius: 6,
-          weight: 2,
+          radius: 4,
+          weight: 1.5,
           color: '#ffffff',
           fillColor: '#2563eb',
           fillOpacity: 1,
