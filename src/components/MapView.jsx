@@ -3,6 +3,9 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapPin } from '@phosphor-icons/react';
 import { useGeolocation } from '../hooks/useGeolocation';
+import { useRoutes } from '../hooks/useRoutes';
+import { useLinesGeometry } from '../hooks/useLinesGeometry';
+import { decodePolyline } from '../utils/polyline';
 
 // Centre par défaut du réseau (repris de la config "zone" de l'app officielle).
 const DEFAULT_CENTER = [45.189053, 5.724681];
@@ -19,6 +22,7 @@ const MAX_MARKERS = 300;
 export default function MapView({ stops, onSelect }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
+  const linesLayerRef = useRef(null);
   const markersLayerRef = useRef(null);
   const stopsRef = useRef(stops);
   const onSelectRef = useRef(onSelect);
@@ -27,6 +31,8 @@ export default function MapView({ stops, onSelect }) {
 
   const { position, request } = useGeolocation();
   const userMarkerRef = useRef(null);
+  const { routesById } = useRoutes();
+  const { lines } = useLinesGeometry();
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -40,6 +46,10 @@ export default function MapView({ stops, onSelect }) {
       maxZoom: 19,
     }).addTo(map);
 
+    // Ordre d'ajout = ordre d'empilement : les tracés d'abord, les arrêts
+    // par-dessus (comme sur la carte de l'app M).
+    const linesLayer = L.layerGroup().addTo(map);
+    linesLayerRef.current = linesLayer;
     const markersLayer = L.layerGroup().addTo(map);
     markersLayerRef.current = markersLayer;
     mapRef.current = map;
@@ -76,6 +86,27 @@ export default function MapView({ stops, onSelect }) {
       mapRef.current = null;
     };
   }, []);
+
+  // Dessine le tracé de chaque ligne avec sa couleur officielle, dès que le
+  // tracé et les infos de ligne (couleur) sont chargés.
+  useEffect(() => {
+    if (!mapRef.current || !linesLayerRef.current || !lines || !routesById) return;
+    const layer = linesLayerRef.current;
+    layer.clearLayers();
+    for (const line of lines) {
+      const routeId = line.code.replace('_', ':');
+      const route = routesById.get(routeId);
+      const points = decodePolyline(line.shape);
+      if (points.length < 2) continue;
+      L.polyline(points, {
+        color: route ? `#${route.color}` : '#94a3b8',
+        weight: 4,
+        opacity: 0.85,
+        lineCap: 'round',
+        lineJoin: 'round',
+      }).addTo(layer);
+    }
+  }, [lines, routesById]);
 
   // Les arrêts se chargent après le montage de la carte (fetch async) :
   // on redéclenche un calcul des marqueurs une fois disponibles.

@@ -53,6 +53,25 @@ export async function getAllRoutes() {
 }
 
 /**
+ * Récupère le tracé géométrique des lignes principales du réseau (trams,
+ * Chrono, Chrono périurbain), pour affichage sur la carte. Retourne un
+ * tableau de { code, shape } — `code` au format "SEM_A" (convertir en id de
+ * ligne avec code.replace('_', ':')), `shape` la polyligne encodée à décoder
+ * avec utils/polyline.js.
+ */
+export async function getLinesGeometry() {
+  const params = new URLSearchParams({
+    types: 'ligne',
+    sousReseaux: 'TRAM,CHRONO,CHRONO_PERI,C38_STRUCT',
+  });
+  const data = await getJson(`${BASE}/lines/poly?${params}`);
+  return data.features.map((f) => ({
+    code: f.properties.CODE,
+    shape: f.properties.shape[0],
+  }));
+}
+
+/**
  * Récupère les prochains passages (temps réel) pour un arrêt donné, toutes lignes confondues.
  * `stopCode` = le champ `code` renvoyé par getAllStops() (ex: "SEM:GENLP").
  *
