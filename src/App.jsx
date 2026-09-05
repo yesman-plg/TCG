@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Tram, Warning, Star, MagnifyingGlass } from '@phosphor-icons/react';
 import { useStops } from './hooks/useStops';
 import { useFavorites } from './hooks/useFavorites';
@@ -13,6 +13,20 @@ export default function App() {
   const { favorites, isFavorite, toggleFavorite, removeFavorite } = useFavorites();
   const [selectedStop, setSelectedStop] = useState(null);
   const [tab, setTab] = useState('search');
+
+  // Un même arrêt peut avoir plusieurs lignes favorites : on les regroupe
+  // pour n'afficher qu'une seule ligne "arrêt" dépliable dans l'onglet Favoris,
+  // au lieu d'une ligne par ligne de transport.
+  const favoriteGroups = useMemo(() => {
+    const groups = new Map();
+    for (const f of favorites) {
+      if (!groups.has(f.code)) {
+        groups.set(f.code, { code: f.code, name: f.name, city: f.city, routes: [] });
+      }
+      groups.get(f.code).routes.push(f);
+    }
+    return [...groups.values()];
+  }, [favorites]);
 
   return (
     <div className="app">
@@ -91,11 +105,11 @@ export default function App() {
               </p>
             ) : (
               <div className="favorites-list">
-                {favorites.map((f) => (
+                {favoriteGroups.map((group) => (
                   <FavoriteRow
-                    key={`${f.code}::${f.routeId}`}
-                    favorite={f}
-                    onRemove={() => removeFavorite(f.code, f.routeId)}
+                    key={group.code}
+                    group={group}
+                    onRemoveRoute={(routeId) => removeFavorite(group.code, routeId)}
                   />
                 ))}
               </div>
