@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'tg_favorites_v1';
+const STORAGE_KEY = 'tg_favorites_v2';
 
-/**
- * Gère la liste des arrêts favoris de l'utilisateur, persistée en localStorage.
- * Un favori est un objet { code, name, city } (voir useStops pour la forme d'un arrêt).
- */
+// Un favori est lié à un arrêt ET à une ligne précise (routeId), pas juste à
+// l'arrêt : un même arrêt peut être desservi par plusieurs lignes, et on ne
+// veut suivre que celles choisies par l'utilisateur.
+// Forme : { code, name, city, routeId, routeShortName, routeColor, routeTextColor }
+
+function sameFavorite(f, code, routeId) {
+  return f.code === code && f.routeId === routeId;
+}
+
 export function useFavorites() {
   const [favorites, setFavorites] = useState(() => {
     try {
@@ -25,22 +30,24 @@ export function useFavorites() {
   }, [favorites]);
 
   const isFavorite = useCallback(
-    (code) => favorites.some((f) => f.code === code),
+    (code, routeId) => favorites.some((f) => sameFavorite(f, code, routeId)),
     [favorites]
   );
 
-  const addFavorite = useCallback((stop) => {
-    setFavorites((prev) => (prev.some((f) => f.code === stop.code) ? prev : [...prev, stop]));
+  const addFavorite = useCallback((entry) => {
+    setFavorites((prev) =>
+      prev.some((f) => sameFavorite(f, entry.code, entry.routeId)) ? prev : [...prev, entry]
+    );
   }, []);
 
-  const removeFavorite = useCallback((code) => {
-    setFavorites((prev) => prev.filter((f) => f.code !== code));
+  const removeFavorite = useCallback((code, routeId) => {
+    setFavorites((prev) => prev.filter((f) => !sameFavorite(f, code, routeId)));
   }, []);
 
   const toggleFavorite = useCallback(
-    (stop) => {
-      if (isFavorite(stop.code)) removeFavorite(stop.code);
-      else addFavorite(stop);
+    (entry) => {
+      if (isFavorite(entry.code, entry.routeId)) removeFavorite(entry.code, entry.routeId);
+      else addFavorite(entry);
     },
     [isFavorite, addFavorite, removeFavorite]
   );

@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import { Tram, Warning } from '@phosphor-icons/react';
+import { Tram, Warning, Star, MagnifyingGlass } from '@phosphor-icons/react';
 import { useStops } from './hooks/useStops';
 import { useFavorites } from './hooks/useFavorites';
 import StopSearch from './components/StopSearch';
 import NearbyStops from './components/NearbyStops';
 import DepartureBoard from './components/DepartureBoard';
+import FavoriteRow from './components/FavoriteRow';
 import './App.css';
 
 export default function App() {
   const { stops, error: stopsError } = useStops();
-  const { favorites, isFavorite, toggleFavorite } = useFavorites();
+  const { favorites, isFavorite, toggleFavorite, removeFavorite } = useFavorites();
   const [selectedStop, setSelectedStop] = useState(null);
+  const [tab, setTab] = useState('search');
 
   return (
     <div className="app">
@@ -24,6 +26,29 @@ export default function App() {
         </div>
       </header>
 
+      <nav className="tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'search'}
+          className={tab === 'search' ? 'tab active' : 'tab'}
+          onClick={() => setTab('search')}
+        >
+          <MagnifyingGlass size={16} aria-hidden="true" />
+          Rechercher
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'favorites'}
+          className={tab === 'favorites' ? 'tab active' : 'tab'}
+          onClick={() => setTab('favorites')}
+        >
+          <Star size={16} aria-hidden="true" />
+          Mes favoris{favorites.length > 0 ? ` (${favorites.length})` : ''}
+        </button>
+      </nav>
+
       <main>
         {stopsError && (
           <p className="error">
@@ -32,45 +57,51 @@ export default function App() {
           </p>
         )}
 
-        <section className="search-section">
-          <StopSearch stops={stops} onSelect={setSelectedStop} />
-        </section>
+        {tab === 'search' && (
+          <>
+            <section className="search-section">
+              <StopSearch stops={stops} onSelect={setSelectedStop} />
+            </section>
 
-        {!selectedStop && (
-          <section className="nearby-section">
-            <NearbyStops stops={stops} onSelect={setSelectedStop} />
-          </section>
+            {!selectedStop && (
+              <section className="nearby-section">
+                <NearbyStops stops={stops} onSelect={setSelectedStop} />
+              </section>
+            )}
+
+            {selectedStop && (
+              <section className="selected-section">
+                <DepartureBoard
+                  stop={selectedStop}
+                  isFavorite={isFavorite}
+                  onToggleFavorite={toggleFavorite}
+                  onClose={() => setSelectedStop(null)}
+                />
+              </section>
+            )}
+          </>
         )}
 
-        {selectedStop && (
-          <section className="selected-section">
-            <DepartureBoard
-              stop={selectedStop}
-              isFavorite={isFavorite(selectedStop.code)}
-              onToggleFavorite={() => toggleFavorite(selectedStop)}
-              onClose={() => setSelectedStop(null)}
-            />
+        {tab === 'favorites' && (
+          <section className="favorites-section">
+            {favorites.length === 0 ? (
+              <p className="muted">
+                Aucun favori pour l'instant. Va dans "Rechercher", choisis un arrêt et clique sur
+                ★ pour l'ajouter.
+              </p>
+            ) : (
+              <div className="favorites-list">
+                {favorites.map((f) => (
+                  <FavoriteRow
+                    key={`${f.code}::${f.routeId}`}
+                    favorite={f}
+                    onRemove={() => removeFavorite(f.code, f.routeId)}
+                  />
+                ))}
+              </div>
+            )}
           </section>
         )}
-
-        <section className="favorites-section">
-          <h2>Mes arrêts favoris</h2>
-          {favorites.length === 0 && (
-            <p className="muted">
-              Aucun favori pour l'instant. Cherche un arrêt ci-dessus et clique sur ★ pour l'ajouter.
-            </p>
-          )}
-          <div className="favorites-grid">
-            {favorites.map((stop) => (
-              <DepartureBoard
-                key={stop.code}
-                stop={stop}
-                isFavorite={true}
-                onToggleFavorite={() => toggleFavorite(stop)}
-              />
-            ))}
-          </div>
-        </section>
       </main>
 
       <footer className="app-footer">

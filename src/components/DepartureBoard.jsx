@@ -15,20 +15,41 @@ function routeIdFromPatternId(patternId) {
   return `${parts[0]}:${parts[1]}`;
 }
 
+function lineBadgeStyle(route) {
+  return route ? { background: `#${route.color}`, color: `#${route.textColor}` } : undefined;
+}
+
 /**
- * Affiche les prochains passages (toutes lignes) pour un arrêt, avec
- * rafraîchissement automatique (voir useStopTimes), les vrais badges de ligne
- * (numéro + couleur officielle) et les infos trafic actives sur ces lignes.
+ * Affiche les prochains passages pour un arrêt, avec rafraîchissement
+ * automatique (voir useStopTimes), les vrais badges de ligne (numéro + couleur
+ * officielle) et les infos trafic actives sur ces lignes.
+ *
+ * - `routeFilter` : si fourni (id de ligne "SEM:C1"), n'affiche que cette ligne
+ *   (utilisé pour les favoris, qui sont liés à une ligne précise).
+ * - `hideHeader` : masque le nom d'arrêt / bouton favori / bouton fermer,
+ *   pour un affichage compact quand un composant parent gère déjà l'en-tête
+ *   (voir FavoriteRow).
+ * - `isFavorite(code, routeId)` / `onToggleFavorite(entry)` : quand un arrêt a
+ *   plusieurs lignes, cliquer sur l'étoile ouvre un petit sélecteur pour
+ *   choisir la/les ligne(s) à suivre plutôt que de tout mettre en favori d'un coup.
  *
  * Les gros arrêts (ex : pôles d'échange) peuvent être desservis par des dizaines
  * de lignes, y compris des cars interurbains à plusieurs heures d'intervalle :
  * on trie par premier passage à venir et on limite l'affichage par défaut.
  */
-export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onClose }) {
+export default function DepartureBoard({
+  stop,
+  isFavorite,
+  onToggleFavorite,
+  onClose,
+  routeFilter,
+  hideHeader = false,
+}) {
   const { patterns, error, loading } = useStopTimes(stop.code);
   const { routesById } = useRoutes();
   const { disruptions } = useDisruptions();
   const [showAll, setShowAll] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const sortedPatterns = useMemo(() => {
     if (!patterns) return null;
@@ -55,48 +76,125 @@ export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onC
     });
   }, [patterns, routesById]);
 
+  // Liste des lignes distinctes desservant l'arrêt (pour le sélecteur de favori).
+  const distinctRoutes = useMemo(() => {
+    if (!sortedPatterns) return [];
+    const seen = new Map();
+    for (const p of sortedPatterns) {
+      const routeId = routeIdFromPatternId(p.pattern.id);
+      if (seen.has(routeId)) continue;
+      const route = routesById?.get(routeId);
+      seen.set(routeId, {
+        routeId,
+        shortName: route?.shortName || p.pattern.shortDesc || '?',
+        color: route?.color,
+        textColor: route?.textColor,
+      });
+    }
+    return [...seen.values()];
+  }, [sortedPatterns, routesById]);
+
+  const filteredPatterns = useMemo(() => {
+    if (!sortedPatterns || !routeFilter) return sortedPatterns;
+    return sortedPatterns.filter((p) => routeIdFromPatternId(p.pattern.id) === routeFilter);
+  }, [sortedPatterns, routeFilter]);
+
   const visiblePatterns = showAll
-    ? sortedPatterns
-    : sortedPatterns?.slice(0, VISIBLE_PATTERNS_DEFAULT);
-  const hiddenCount = sortedPatterns ? sortedPatterns.length - (visiblePatterns?.length ?? 0) : 0;
+    ? filteredPatterns
+    : filteredPatterns?.slice(0, VISIBLE_PATTERNS_DEFAULT);
+  const hiddenCount = filteredPatterns
+    ? filteredPatterns.length - (visiblePatterns?.length ?? 0)
+    : 0;
 
   const stopDisruptions = useMemo(() => {
-    if (!patterns || !disruptions) return [];
-    const routeIds = [...new Set(patterns.map((p) => routeIdFromPatternId(p.pattern.id)))];
+    if (!filteredPatterns || !disruptions) return [];
+    const routeIds = [...new Set(filteredPatterns.map((p) => routeIdFromPatternId(p.pattern.id)))];
     return disruptionsForRoutes(disruptions, routeIds);
-  }, [patterns, disruptions]);
+  }, [filteredPatterns, disruptions]);
+
+  const anyFavorited = !hideHeader && distinctRoutes.some((r) => isFavorite?.(stop.code, r.routeId));
+
+  function favoriteEntryFor(route) {
+    return {
+      code: stop.code,
+      name: stop.name,
+      city: stop.city,
+      routeId: route.routeId,
+      routeShortName: route.shortName,
+      routeColor: route.color,
+      routeTextColor: route.textColor,
+    };
+  }
+
+  function handleStarClick() {
+    if (distinctRoutes.length <= 1) {
+      if (distinctRoutes[0]) onToggleFavorite?.(favoriteEntryFor(distinctRoutes[0]));
+      return;
+    }
+    setPickerOpen((open) => !open);
+  }
 
   return (
     <div className="departure-board">
-      <div className="departure-board-header">
-        <div>
-          <h3>{stop.name}</h3>
-          <p className="stop-city">{stop.city}</p>
-        </div>
-        <div className="departure-board-actions">
-          <button
-            type="button"
-            className={isFavorite ? 'fav-btn active' : 'fav-btn'}
-            onClick={onToggleFavorite}
-            aria-pressed={isFavorite}
-            aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-            title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-          >
-            <Star size={20} weight={isFavorite ? 'fill' : 'regular'} aria-hidden="true" />
-          </button>
-          {onClose && (
+      {!hideHeader && (
+        <div className="departure-board-header">
+          <div>
+            <h3>{stop.name}</h3>
+            <p className="stop-city">{stop.city}</p>
+          </div>
+          <div className="departure-board-actions">
             <button
               type="button"
-              className="close-btn"
-              onClick={onClose}
-              aria-label="Fermer"
-              title="Fermer"
+              className={anyFavorited ? 'fav-btn active' : 'fav-btn'}
+              onClick={handleStarClick}
+              disabled={distinctRoutes.length === 0}
+              aria-pressed={anyFavorited}
+              aria-expanded={pickerOpen}
+              aria-label={anyFavorited ? 'Gérer les lignes favorites' : 'Ajouter aux favoris'}
+              title={anyFavorited ? 'Gérer les lignes favorites' : 'Ajouter aux favoris'}
             >
-              <X size={20} aria-hidden="true" />
+              <Star size={20} weight={anyFavorited ? 'fill' : 'regular'} aria-hidden="true" />
             </button>
-          )}
+            {onClose && (
+              <button
+                type="button"
+                className="close-btn"
+                onClick={onClose}
+                aria-label="Fermer"
+                title="Fermer"
+              >
+                <X size={20} aria-hidden="true" />
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {!hideHeader && pickerOpen && distinctRoutes.length > 1 && (
+        <div className="route-picker">
+          <p className="route-picker-title">Quelle(s) ligne(s) suivre à cet arrêt ?</p>
+          <ul className="route-picker-list">
+            {distinctRoutes.map((r) => {
+              const fav = isFavorite?.(stop.code, r.routeId);
+              return (
+                <li key={r.routeId}>
+                  <button
+                    type="button"
+                    className={fav ? 'route-picker-item active' : 'route-picker-item'}
+                    onClick={() => onToggleFavorite?.(favoriteEntryFor(r))}
+                    aria-pressed={fav}
+                  >
+                    <span className="line-badge" style={lineBadgeStyle(r)}>
+                      {r.shortName}
+                    </span>
+                    <Star size={14} weight={fav ? 'fill' : 'regular'} aria-hidden="true" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
 
       {stopDisruptions.length > 0 && (
         <ul className="disruption-list">
@@ -112,7 +210,7 @@ export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onC
       {loading && <p className="muted">Chargement des horaires…</p>}
       {error && <p className="error">Impossible de charger les horaires pour cet arrêt.</p>}
 
-      {patterns && patterns.length === 0 && (
+      {filteredPatterns && filteredPatterns.length === 0 && (
         <p className="muted">Aucun passage prévu pour le moment.</p>
       )}
 
@@ -124,14 +222,7 @@ export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onC
             return (
               <li key={`${p.pattern.id}-${idx}`} className="pattern-item">
                 <div className="pattern-label">
-                  <span
-                    className="line-badge"
-                    style={
-                      route
-                        ? { background: `#${route.color}`, color: `#${route.textColor}` }
-                        : undefined
-                    }
-                  >
+                  <span className="line-badge" style={lineBadgeStyle(route)}>
                     {route?.shortName || p.pattern.shortDesc || '?'}
                   </span>
                   <span className="pattern-dest">→ {p.pattern.desc}</span>
