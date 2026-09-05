@@ -36,9 +36,11 @@ export default function App() {
           <StopSearch stops={stops} onSelect={setSelectedStop} />
         </section>
 
-        <section className="nearby-section">
-          <NearbyStops stops={stops} onSelect={setSelectedStop} />
-        </section>
+        {!selectedStop && (
+          <section className="nearby-section">
+            <NearbyStops stops={stops} onSelect={setSelectedStop} />
+          </section>
+        )}
 
         {selectedStop && (
           <section className="selected-section">
