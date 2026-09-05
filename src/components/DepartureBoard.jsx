@@ -4,9 +4,10 @@ import { useStopTimes } from '../hooks/useStopTimes';
 import { useNow } from '../hooks/useNow';
 import { useRoutes } from '../hooks/useRoutes';
 import { useDisruptions } from '../hooks/useDisruptions';
-import { disruptionsForRoutes } from '../utils/disruptions';
+import { disruptionsByRoute } from '../utils/disruptions';
 import { formatTime, minutesUntil } from '../utils/time';
 import { naturalCompare, categoryRank } from '../utils/sort';
+import Modal from './Modal';
 
 const VISIBLE_PATTERNS_DEFAULT = 8;
 
@@ -54,6 +55,7 @@ export default function DepartureBoard({
   const { disruptions } = useDisruptions();
   const [showAll, setShowAll] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [openAlertRouteId, setOpenAlertRouteId] = useState(null);
 
   const sortedPatterns = useMemo(() => {
     if (!patterns) return null;
@@ -110,11 +112,16 @@ export default function DepartureBoard({
     ? filteredPatterns.length - (visiblePatterns?.length ?? 0)
     : 0;
 
-  const stopDisruptions = useMemo(() => {
-    if (!filteredPatterns || !disruptions) return [];
+  // Alertes actives groupées par ligne, pour un signalement au niveau de
+  // chaque badge de ligne plutôt qu'un bandeau global qui mélange tout.
+  const routeDisruptions = useMemo(() => {
+    if (!filteredPatterns || !disruptions) return new Map();
     const routeIds = [...new Set(filteredPatterns.map((p) => routeIdFromPatternId(p.pattern.id)))];
-    return disruptionsForRoutes(disruptions, routeIds);
+    return disruptionsByRoute(disruptions, routeIds);
   }, [filteredPatterns, disruptions]);
+
+  const openAlertList = openAlertRouteId ? routeDisruptions.get(openAlertRouteId) : null;
+  const openAlertRoute = openAlertRouteId ? routesById?.get(openAlertRouteId) : null;
 
   const anyFavorited = !hideHeader && distinctRoutes.some((r) => isFavorite?.(stop.code, r.routeId));
 
@@ -200,17 +207,6 @@ export default function DepartureBoard({
         </div>
       )}
 
-      {stopDisruptions.length > 0 && (
-        <ul className="disruption-list">
-          {stopDisruptions.map((d) => (
-            <li key={d.code} className="disruption-item">
-              <Warning size={16} weight="fill" className="disruption-icon" aria-hidden="true" />
-              <span>{d.titre}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
       {loading && <p className="muted">Chargement des horaires…</p>}
       {error && <p className="error">Impossible de charger les horaires pour cet arrêt.</p>}
 
@@ -223,11 +219,25 @@ export default function DepartureBoard({
           {visiblePatterns.map((p, idx) => {
             const routeId = routeIdFromPatternId(p.pattern.id);
             const route = routesById?.get(routeId);
+            const alerts = routeDisruptions.get(routeId);
             return (
               <li key={`${p.pattern.id}-${idx}`} className="pattern-item">
                 <div className="pattern-label">
-                  <span className="line-badge" style={lineBadgeStyle(route)}>
-                    {route?.shortName || p.pattern.shortDesc || '?'}
+                  <span className="line-badge-wrap">
+                    <span className="line-badge" style={lineBadgeStyle(route)}>
+                      {route?.shortName || p.pattern.shortDesc || '?'}
+                    </span>
+                    {alerts?.length > 0 && (
+                      <button
+                        type="button"
+                        className="line-alert-btn"
+                        onClick={() => setOpenAlertRouteId(routeId)}
+                        aria-label={`${alerts.length} alerte${alerts.length > 1 ? 's' : ''} sur la ligne ${route?.shortName || ''}`}
+                        title="Voir les alertes de cette ligne"
+                      >
+                        <Warning size={11} weight="fill" aria-hidden="true" />
+                      </button>
+                    )}
                   </span>
                   <span className="pattern-dest">→ {p.pattern.desc}</span>
                 </div>
@@ -261,6 +271,27 @@ export default function DepartureBoard({
           Afficher {hiddenCount} ligne{hiddenCount > 1 ? 's' : ''} de plus
           <CaretDown size={14} aria-hidden="true" />
         </button>
+      )}
+
+      {openAlertList && (
+        <Modal
+          title={`Alertes — ligne ${openAlertRoute?.shortName || ''}`}
+          onClose={() => setOpenAlertRouteId(null)}
+        >
+          <ul className="alert-detail-list">
+            {openAlertList.map((d) => (
+              <li key={d.code} className="alert-detail-item">
+                <h4>{d.titre}</h4>
+                {d.description && <p>{d.description}</p>}
+                {d.plan && (
+                  <a href={d.plan} target="_blank" rel="noreferrer">
+                    Voir le document
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Modal>
       )}
     </div>
   );

@@ -33,3 +33,22 @@ export function disruptionsForRoutes(disruptions, routeIds) {
     (d) => d.listeLigne && codes.has(d.listeLigne) && d.visibleTC && isActive(d, now)
   );
 }
+
+/**
+ * Regroupe les perturbations actives par ligne (Map routeId -> perturbations),
+ * pour afficher un signalement au niveau de chaque ligne plutôt qu'un bandeau
+ * global mélangeant toutes les lignes de l'arrêt.
+ */
+export function disruptionsByRoute(disruptions, routeIds) {
+  const map = new Map();
+  if (!disruptions || !routeIds?.length) return map;
+  const now = new Date();
+  for (const routeId of routeIds) {
+    const code = toDisruptionLineCode(routeId);
+    const matches = Object.values(disruptions).filter(
+      (d) => d.listeLigne === code && d.visibleTC && isActive(d, now)
+    );
+    if (matches.length > 0) map.set(routeId, matches);
+  }
+  return map;
+}
