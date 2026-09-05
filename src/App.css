@@ -566,8 +566,12 @@ input {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 0.6rem;
-  padding: 0.5rem 0.8rem;
-  min-width: 4.5rem;
+  padding: 0.5rem 0.4rem;
+  /* Largeur fixe (pas juste min-width) : sinon un mot plus long ("imminent",
+     "Modérée") élargit la carte et fait basculer la ligne de 3 à 2+1 cartes
+     de façon imprévisible selon les valeurs affichées à l'instant t. */
+  width: 4.7rem;
+  flex: 0 0 auto;
 }
 
 .time-minutes {
