@@ -53,17 +53,19 @@ export async function getAllRoutes() {
 }
 
 /**
- * Récupère le tracé géométrique des lignes principales du réseau (trams,
- * Chrono, Chrono périurbain), pour affichage sur la carte. Retourne un
- * tableau de { code, shape } — `code` au format "SEM_A" (convertir en id de
- * ligne avec code.replace('_', ':')), `shape` la polyligne encodée à décoder
- * avec utils/polyline.js.
+ * Récupère le tracé géométrique de TOUTES les lignes du réseau (trams,
+ * Chrono, bus de proximité, interurbain...), pour affichage sur la carte.
+ * Retourne un tableau de { code, shape } — `code` au format "SEM_A" ou
+ * "SE2_84" (convertir en id de ligne avec code.replace('_', ':')), `shape`
+ * la polyligne encodée à décoder avec utils/polyline.js.
+ *
+ * Pas de filtre `sousReseaux` ici : se limiter à TRAM/CHRONO laissait de
+ * côté des lignes bien réelles (ex: 84, 86, T83) qui apparaissent pourtant
+ * dans les horaires de l'app — le tri pertinent se fait après, en ne
+ * gardant que les lignes connues de /index/routes (voir MapView).
  */
 export async function getLinesGeometry() {
-  const params = new URLSearchParams({
-    types: 'ligne',
-    sousReseaux: 'TRAM,CHRONO,CHRONO_PERI,C38_STRUCT',
-  });
+  const params = new URLSearchParams({ types: 'ligne' });
   const data = await getJson(`${BASE}/lines/poly?${params}`);
   return data.features.map((f) => ({
     code: f.properties.CODE,

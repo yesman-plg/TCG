@@ -59,12 +59,13 @@ export default function MapView({ stops, onSelect }) {
     const map = L.map(containerRef.current, {
       center: DEFAULT_CENTER,
       zoom: DEFAULT_ZOOM,
+      attributionControl: false,
     });
+    L.control.attribution({ prefix: false }).addTo(map);
     L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
       {
-        attribution:
-          '&copy; <a href="https://www.esri.com">Esri</a>, HERE, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors',
+        attribution: '&copy; <a href="https://www.esri.com">Esri</a>',
         maxZoom: 19,
         maxNativeZoom: 19,
       }
@@ -124,9 +125,10 @@ export default function MapView({ stops, onSelect }) {
     for (const line of lines) {
       const routeId = line.code.replace('_', ':');
       const route = routesById.get(routeId);
+      if (!route) continue; // ligne inconnue de /index/routes (obsolète ou hors périmètre)
       const points = decodePolyline(line.shape);
       if (points.length < 2) continue;
-      const color = route ? `#${route.color}` : '#94a3b8';
+      const color = `#${route.color}`;
       // Liseré sombre sous le tracé : certaines lignes (les Chrono, par ex.)
       // ont une couleur officielle très pâle (jaune clair) qui se fond
       // presque dans le fond de carte clair sans ce contour.
