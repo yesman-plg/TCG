@@ -610,6 +610,45 @@ input {
   text-align: center;
 }
 
+.traffic-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.traffic-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.6rem 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 150ms ease;
+}
+
+.traffic-item:hover {
+  border-color: var(--delay);
+}
+
+.traffic-item-count {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.traffic-item-icon {
+  margin-left: auto;
+  color: var(--delay);
+  flex-shrink: 0;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

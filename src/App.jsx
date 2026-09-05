@@ -6,6 +6,7 @@ import StopSearch from './components/StopSearch';
 import NearbyStops from './components/NearbyStops';
 import DepartureBoard from './components/DepartureBoard';
 import FavoriteRow from './components/FavoriteRow';
+import TrafficTab from './components/TrafficTab';
 import './App.css';
 
 export default function App() {
@@ -61,6 +62,16 @@ export default function App() {
           <Star size={16} aria-hidden="true" />
           Mes favoris
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'traffic'}
+          className={tab === 'traffic' ? 'tab active' : 'tab'}
+          onClick={() => setTab('traffic')}
+        >
+          <Warning size={16} aria-hidden="true" />
+          Trafic
+        </button>
       </nav>
 
       <main>
@@ -114,6 +125,12 @@ export default function App() {
                 ))}
               </div>
             )}
+          </section>
+        )}
+
+        {tab === 'traffic' && (
+          <section className="traffic-section">
+            <TrafficTab />
           </section>
         )}
       </main>

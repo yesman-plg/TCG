@@ -39,6 +39,24 @@ export function disruptionsForRoutes(disruptions, routeIds) {
 }
 
 /**
+ * Regroupe TOUTES les perturbations actives par ligne (Map routeId ->
+ * perturbations), tous réseaux confondus (utilisé par l'onglet Trafic, qui
+ * filtre ensuite sur les lignes réellement couvertes par l'app).
+ */
+export function activeDisruptionsByLine(disruptions) {
+  const map = new Map();
+  if (!disruptions) return map;
+  const now = new Date();
+  for (const d of Object.values(disruptions)) {
+    if (!d.listeLigne || !d.visibleTC || !isActive(d, now)) continue;
+    const routeId = d.listeLigne.replace('_', ':');
+    if (!map.has(routeId)) map.set(routeId, []);
+    map.get(routeId).push(d);
+  }
+  return map;
+}
+
+/**
  * Regroupe les perturbations actives par ligne (Map routeId -> perturbations),
  * pour afficher un signalement au niveau de chaque ligne plutôt qu'un bandeau
  * global mélangeant toutes les lignes de l'arrêt.
