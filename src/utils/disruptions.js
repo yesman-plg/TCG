@@ -6,11 +6,15 @@ function parseFrenchDateTime(str) {
   return new Date(year, month - 1, day, hours, minutes);
 }
 
-/** Une perturbation est active si la date du jour est comprise dans [dateDebut, dateFin]. */
+/**
+ * Une perturbation est pertinente tant qu'elle n'est pas terminée (dateFin
+ * dépassée) — comme l'app M, qui affiche aussi les perturbations à venir
+ * (ex: travaux annoncés dans 2 jours), pas seulement celles en cours à la
+ * seconde près. On ignore volontairement dateDebut.
+ */
 export function isActive(disruption, now = new Date()) {
-  const start = parseFrenchDateTime(disruption.dateDebut);
   const end = parseFrenchDateTime(disruption.dateFin);
-  return now >= start && now <= end;
+  return now <= end;
 }
 
 /**
