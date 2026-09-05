@@ -70,11 +70,13 @@ export default function MapView({ stops, onSelect }) {
       for (const s of currentStops) {
         if (count >= MAX_MARKERS) break;
         if (!bounds.contains([s.lat, s.lon])) continue;
+        // Petit cercle blanc à fin contour gris (comme les points d'arrêt de
+        // l'app M), plutôt qu'un point plein qui alourdit la carte.
         const marker = L.circleMarker([s.lat, s.lon], {
-          radius: 4,
-          weight: 1.5,
-          color: '#ffffff',
-          fillColor: '#2563eb',
+          radius: 4.5,
+          weight: 2,
+          color: '#64748b',
+          fillColor: '#ffffff',
           fillOpacity: 1,
         });
         marker.bindTooltip(s.name, { direction: 'top', offset: [0, -6] });
@@ -110,14 +112,14 @@ export default function MapView({ stops, onSelect }) {
       // presque dans le fond de carte clair sans ce contour.
       L.polyline(points, {
         color: '#1e293b',
-        weight: 6,
-        opacity: 0.3,
+        weight: 7,
+        opacity: 0.15,
         lineCap: 'round',
         lineJoin: 'round',
       }).addTo(layer);
       L.polyline(points, {
         color,
-        weight: 3.5,
+        weight: 5,
         opacity: 1,
         lineCap: 'round',
         lineJoin: 'round',
