@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useStops } from './hooks/useStops';
 import { useFavorites } from './hooks/useFavorites';
 import StopSearch from './components/StopSearch';
+import NearbyStops from './components/NearbyStops';
 import DepartureBoard from './components/DepartureBoard';
 import './App.css';
 
@@ -26,6 +27,10 @@ export default function App() {
 
         <section className="search-section">
           <StopSearch stops={stops} onSelect={setSelectedStop} />
+        </section>
+
+        <section className="nearby-section">
+          <NearbyStops stops={stops} onSelect={setSelectedStop} />
         </section>
 
         {selectedStop && (

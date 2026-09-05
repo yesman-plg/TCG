@@ -1,12 +1,22 @@
 import { useMemo, useState } from 'react';
 import { useStopTimes } from '../hooks/useStopTimes';
+import { useRoutes } from '../hooks/useRoutes';
+import { useDisruptions } from '../hooks/useDisruptions';
+import { disruptionsForRoutes } from '../utils/disruptions';
 import { formatTime, minutesUntil } from '../utils/time';
 
 const VISIBLE_PATTERNS_DEFAULT = 8;
 
+/** Extrait l'id de ligne ("SEM:C5") depuis l'id de pattern OTP ("SEM:C5:1:12345"). */
+function routeIdFromPatternId(patternId) {
+  const parts = patternId.split(':');
+  return `${parts[0]}:${parts[1]}`;
+}
+
 /**
  * Affiche les prochains passages (toutes lignes) pour un arrêt, avec
- * rafraîchissement automatique (voir useStopTimes).
+ * rafraîchissement automatique (voir useStopTimes), les vrais badges de ligne
+ * (numéro + couleur officielle) et les infos trafic actives sur ces lignes.
  *
  * Les gros arrêts (ex : pôles d'échange) peuvent être desservis par des dizaines
  * de lignes, y compris des cars interurbains à plusieurs heures d'intervalle :
@@ -14,6 +24,8 @@ const VISIBLE_PATTERNS_DEFAULT = 8;
  */
 export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onClose }) {
   const { patterns, error, loading } = useStopTimes(stop.code);
+  const { routesById } = useRoutes();
+  const { disruptions } = useDisruptions();
   const [showAll, setShowAll] = useState(false);
 
   const sortedPatterns = useMemo(() => {
@@ -29,6 +41,12 @@ export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onC
     ? sortedPatterns
     : sortedPatterns?.slice(0, VISIBLE_PATTERNS_DEFAULT);
   const hiddenCount = sortedPatterns ? sortedPatterns.length - (visiblePatterns?.length ?? 0) : 0;
+
+  const stopDisruptions = useMemo(() => {
+    if (!patterns || !disruptions) return [];
+    const routeIds = [...new Set(patterns.map((p) => routeIdFromPatternId(p.pattern.id)))];
+    return disruptionsForRoutes(disruptions, routeIds);
+  }, [patterns, disruptions]);
 
   return (
     <div className="departure-board">
@@ -54,6 +72,17 @@ export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onC
         </div>
       </div>
 
+      {stopDisruptions.length > 0 && (
+        <ul className="disruption-list">
+          {stopDisruptions.map((d) => (
+            <li key={d.code} className="disruption-item">
+              <span className="disruption-icon">⚠</span>
+              <span>{d.titre}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
       {loading && <p className="muted">Chargement des horaires…</p>}
       {error && <p className="error">Impossible de charger les horaires pour cet arrêt.</p>}
 
@@ -63,32 +92,45 @@ export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onC
 
       {visiblePatterns && visiblePatterns.length > 0 && (
         <ul className="pattern-list">
-          {visiblePatterns.map((p, idx) => (
-            <li key={`${p.pattern.id}-${idx}`} className="pattern-item">
-              <div className="pattern-label">
-                <span className="line-badge">{p.pattern.shortDesc || p.pattern.desc}</span>
-                <span className="pattern-dest">→ {p.pattern.desc}</span>
-              </div>
-              <ul className="times-list">
-                {p.times.slice(0, 4).map((t, i) => (
-                  <li key={i} className={t.realtime ? 'time realtime' : 'time'}>
-                    <span className="time-minutes">
-                      {minutesUntil(t.serviceDay, t.realtimeArrival) <= 1
-                        ? 'imminent'
-                        : `${minutesUntil(t.serviceDay, t.realtimeArrival)} min`}
-                    </span>
-                    <span className="time-clock">
-                      {formatTime(t.serviceDay, t.realtimeArrival)}
-                    </span>
-                    {t.arrivalDelay > 60 && (
-                      <span className="delay">+{Math.round(t.arrivalDelay / 60)} min</span>
-                    )}
-                    {t.occupancy && <span className="occupancy">{t.occupancy}</span>}
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
+          {visiblePatterns.map((p, idx) => {
+            const routeId = routeIdFromPatternId(p.pattern.id);
+            const route = routesById?.get(routeId);
+            return (
+              <li key={`${p.pattern.id}-${idx}`} className="pattern-item">
+                <div className="pattern-label">
+                  <span
+                    className="line-badge"
+                    style={
+                      route
+                        ? { background: `#${route.color}`, color: `#${route.textColor}` }
+                        : undefined
+                    }
+                  >
+                    {route?.shortName || p.pattern.shortDesc || '?'}
+                  </span>
+                  <span className="pattern-dest">→ {p.pattern.desc}</span>
+                </div>
+                <ul className="times-list">
+                  {p.times.slice(0, 4).map((t, i) => (
+                    <li key={i} className={t.realtime ? 'time realtime' : 'time'}>
+                      <span className="time-minutes">
+                        {minutesUntil(t.serviceDay, t.realtimeArrival) <= 1
+                          ? 'imminent'
+                          : `${minutesUntil(t.serviceDay, t.realtimeArrival)} min`}
+                      </span>
+                      <span className="time-clock">
+                        {formatTime(t.serviceDay, t.realtimeArrival)}
+                      </span>
+                      {t.arrivalDelay > 60 && (
+                        <span className="delay">+{Math.round(t.arrivalDelay / 60)} min</span>
+                      )}
+                      {t.occupancy && <span className="occupancy">{t.occupancy}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            );
+          })}
         </ul>
       )}
 

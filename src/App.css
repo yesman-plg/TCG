@@ -230,6 +230,102 @@ body {
   font-style: italic;
 }
 
+.nearby-section {
+  margin-bottom: 1.5rem;
+}
+
+.nearby-btn {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.nearby-btn:hover {
+  border-color: var(--accent);
+}
+
+.nearby-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.nearby-header h2 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.retry-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0;
+}
+
+.nearby-results {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+}
+
+.nearby-results button {
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  border-radius: 0.4rem;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.nearby-results button:hover {
+  background: var(--bg);
+}
+
+.stop-distance {
+  color: var(--muted);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.disruption-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.disruption-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  background: color-mix(in srgb, var(--delay) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--delay) 35%, transparent);
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.disruption-icon {
+  flex-shrink: 0;
+}
+
 .show-more-btn {
   margin-top: 0.75rem;
   background: none;
