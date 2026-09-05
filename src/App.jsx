@@ -45,7 +45,7 @@ export default function App() {
           onClick={() => setTab('favorites')}
         >
           <Star size={16} aria-hidden="true" />
-          Mes favoris{favorites.length > 0 ? ` (${favorites.length})` : ''}
+          Mes favoris
         </button>
       </nav>
 
