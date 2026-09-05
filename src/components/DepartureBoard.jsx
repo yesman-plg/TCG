@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Star, X, Warning, CaretDown } from '@phosphor-icons/react';
 import { useStopTimes } from '../hooks/useStopTimes';
 import { useRoutes } from '../hooks/useRoutes';
 import { useDisruptions } from '../hooks/useDisruptions';
@@ -60,13 +61,21 @@ export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onC
             type="button"
             className={isFavorite ? 'fav-btn active' : 'fav-btn'}
             onClick={onToggleFavorite}
+            aria-pressed={isFavorite}
+            aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
             title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           >
-            {isFavorite ? '★' : '☆'}
+            <Star size={20} weight={isFavorite ? 'fill' : 'regular'} aria-hidden="true" />
           </button>
           {onClose && (
-            <button type="button" className="close-btn" onClick={onClose} title="Fermer">
-              ✕
+            <button
+              type="button"
+              className="close-btn"
+              onClick={onClose}
+              aria-label="Fermer"
+              title="Fermer"
+            >
+              <X size={20} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -76,7 +85,7 @@ export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onC
         <ul className="disruption-list">
           {stopDisruptions.map((d) => (
             <li key={d.code} className="disruption-item">
-              <span className="disruption-icon">⚠</span>
+              <Warning size={16} weight="fill" className="disruption-icon" aria-hidden="true" />
               <span>{d.titre}</span>
             </li>
           ))}
@@ -137,6 +146,7 @@ export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onC
       {hiddenCount > 0 && (
         <button type="button" className="show-more-btn" onClick={() => setShowAll(true)}>
           Afficher {hiddenCount} ligne{hiddenCount > 1 ? 's' : ''} de plus
+          <CaretDown size={14} aria-hidden="true" />
         </button>
       )}
     </div>

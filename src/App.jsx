@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Tram, Warning } from '@phosphor-icons/react';
 import { useStops } from './hooks/useStops';
 import { useFavorites } from './hooks/useFavorites';
 import StopSearch from './components/StopSearch';
@@ -14,13 +15,19 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>🚋 Horaires TAG</h1>
-        <p className="muted">Temps réel — réseau M (Grenoble-Alpes Métropole)</p>
+        <span className="app-header-icon" aria-hidden="true">
+          <Tram size={24} weight="fill" />
+        </span>
+        <div>
+          <h1>Horaires TAG</h1>
+          <p className="muted">Temps réel — réseau M (Grenoble-Alpes Métropole)</p>
+        </div>
       </header>
 
       <main>
         {stopsError && (
           <p className="error">
+            <Warning size={18} aria-hidden="true" />
             Impossible de charger la liste des arrêts. Vérifie ta connexion et recharge la page.
           </p>
         )}

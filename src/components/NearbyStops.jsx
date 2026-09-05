@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { MapPin, ArrowsClockwise, Warning } from '@phosphor-icons/react';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { distanceMeters, formatDistance } from '../utils/geo';
 
@@ -22,7 +23,8 @@ export default function NearbyStops({ stops, onSelect }) {
   if (status === 'idle') {
     return (
       <button type="button" className="nearby-btn" onClick={request} disabled={!stops}>
-        📍 Arrêts près de moi
+        <MapPin size={18} weight="fill" aria-hidden="true" />
+        Arrêts près de moi
       </button>
     );
   }
@@ -34,6 +36,7 @@ export default function NearbyStops({ stops, onSelect }) {
   if (status === 'error') {
     return (
       <p className="error">
+        <Warning size={18} aria-hidden="true" />
         Localisation impossible ({error?.message || 'permission refusée'}).{' '}
         <button type="button" className="retry-link" onClick={request}>
           Réessayer
@@ -47,6 +50,7 @@ export default function NearbyStops({ stops, onSelect }) {
       <div className="nearby-header">
         <h2>Arrêts près de moi</h2>
         <button type="button" className="retry-link" onClick={request}>
+          <ArrowsClockwise size={14} aria-hidden="true" />
           Actualiser
         </button>
       </div>

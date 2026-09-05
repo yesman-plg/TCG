@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { MagnifyingGlass } from '@phosphor-icons/react';
 
 /**
  * Champ de recherche d'arrêt avec autocomplétion locale (les ~860 arrêts
@@ -17,6 +18,7 @@ export default function StopSearch({ stops, onSelect }) {
 
   return (
     <div className="stop-search">
+      <MagnifyingGlass size={18} className="search-icon" aria-hidden="true" />
       <input
         type="text"
         placeholder="Rechercher un arrêt (ex : Victor Hugo)"

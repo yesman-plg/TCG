@@ -1,16 +1,47 @@
-# React + Vite
+# Horaires TAG
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+App web (installable en PWA) affichant les prochains passages en temps réel du
+réseau de transport en commun de Grenoble (TAG / réseau M), en remplacement de
+l'appli officielle « M ».
 
-Currently, two official plugins are available:
+## Fonctionnalités
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Recherche instantanée parmi les ~860 arrêts du réseau
+- Arrêts les plus proches via géolocalisation
+- Prochains passages temps réel par arrêt (toutes lignes confondues), avec
+  retard et niveau d'occupation, rafraîchis toutes les 30s
+- Alertes trafic actives filtrées par ligne desservant l'arrêt
+- Arrêts favoris persistés en local
+- Installable comme app (PWA), fonctionne hors-ligne pour l'interface (les
+  horaires temps réel nécessitent bien sûr une connexion)
 
-## React Compiler
+## Données
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Toutes les données viennent de l'API publique de **Mobilités M** (SMMAG /
+Grenoble-Alpes Métropole), backend OpenTripPlanner exposé sur
+`data.mobilites-m.fr` — aucune clé API requise. Voir
+[src/api/mobilitesM.js](src/api/mobilitesM.js) pour le détail des endpoints.
+Données sous licence ODbL.
 
-## Expanding the Oxlint configuration
+⚠️ Le domaine historique `metromobilite.fr`, référencé dans d'anciens tutoriels
+communautaires, a été repris par une agence publicitaire et n'a plus aucun
+lien avec le réseau de transport — ignorer toute doc qui s'y réfère.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Développement
+
+```bash
+npm install
+npm run dev       # serveur de dev (http://localhost:5173)
+npm run build     # build de production (+ génère le service worker PWA)
+npm run preview   # sert le build de production localement
+```
+
+## Icônes PWA
+
+Les icônes dans `public/icons/` sont générées depuis des SVG sources (non
+versionnés) via `sharp`. Pour les régénérer après modification du design :
+
+```bash
+npm install --no-save sharp
+node -e "..." # voir historique du projet pour le script de génération
+```
