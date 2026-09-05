@@ -104,10 +104,21 @@ export default function MapView({ stops, onSelect }) {
       const route = routesById.get(routeId);
       const points = decodePolyline(line.shape);
       if (points.length < 2) continue;
+      const color = route ? `#${route.color}` : '#94a3b8';
+      // Liseré sombre sous le tracé : certaines lignes (les Chrono, par ex.)
+      // ont une couleur officielle très pâle (jaune clair) qui se fond
+      // presque dans le fond de carte clair sans ce contour.
       L.polyline(points, {
-        color: route ? `#${route.color}` : '#94a3b8',
-        weight: 4,
-        opacity: 0.85,
+        color: '#1e293b',
+        weight: 6,
+        opacity: 0.3,
+        lineCap: 'round',
+        lineJoin: 'round',
+      }).addTo(layer);
+      L.polyline(points, {
+        color,
+        weight: 3.5,
+        opacity: 1,
         lineCap: 'round',
         lineJoin: 'round',
       }).addTo(layer);
