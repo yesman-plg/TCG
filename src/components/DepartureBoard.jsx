@@ -5,7 +5,7 @@ import { useNow } from '../hooks/useNow';
 import { useRoutes } from '../hooks/useRoutes';
 import { useDisruptions } from '../hooks/useDisruptions';
 import { disruptionsForRoutes } from '../utils/disruptions';
-import { minutesUntil } from '../utils/time';
+import { formatTime, minutesUntil } from '../utils/time';
 import { naturalCompare, categoryRank } from '../utils/sort';
 
 const VISIBLE_PATTERNS_DEFAULT = 8;
@@ -244,6 +244,7 @@ export default function DepartureBoard({
                             ? 'imminent'
                             : `${minutesUntil(t.serviceDay, t.realtimeArrival)} min`}
                         </span>
+                        <span className="time-clock">{formatTime(t.serviceDay, t.realtimeArrival)}</span>
                         {t.occupancy && <span className="occupancy">{t.occupancy}</span>}
                       </li>
                     );
