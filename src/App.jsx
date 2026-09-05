@@ -19,8 +19,8 @@ export default function App() {
           <Tram size={24} weight="fill" />
         </span>
         <div>
-          <h1>Horaires TAG</h1>
-          <p className="muted">Temps réel — réseau M (Grenoble-Alpes Métropole)</p>
+          <h1>TCG</h1>
+          <p className="muted">Horaires TAG temps réel — réseau M (Grenoble-Alpes Métropole)</p>
         </div>
       </header>
 

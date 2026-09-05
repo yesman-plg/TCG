@@ -1,4 +1,4 @@
-# Horaires TAG
+# TCG
 
 App web (installable en PWA) affichant les prochains passages en temps réel du
 réseau de transport en commun de Grenoble (TAG / réseau M), en remplacement de

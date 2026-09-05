@@ -9,8 +9,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Horaires TAG — Grenoble',
-        short_name: 'Horaires TAG',
+        name: 'TCG — Horaires TAG Grenoble',
+        short_name: 'TCG',
         description: 'Prochains passages en temps réel du réseau M (TAG) à Grenoble.',
         theme_color: '#2563eb',
         background_color: '#f8fafc',
