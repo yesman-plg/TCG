@@ -4,7 +4,7 @@ import { useStopTimes } from '../hooks/useStopTimes';
 import { useRoutes } from '../hooks/useRoutes';
 import { useDisruptions } from '../hooks/useDisruptions';
 import { disruptionsForRoutes } from '../utils/disruptions';
-import { formatTime, minutesUntil } from '../utils/time';
+import { minutesUntil } from '../utils/time';
 import { naturalCompare, modeRank } from '../utils/sort';
 
 const VISIBLE_PATTERNS_DEFAULT = 8;
@@ -137,22 +137,22 @@ export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onC
                   <span className="pattern-dest">→ {p.pattern.desc}</span>
                 </div>
                 <ul className="times-list">
-                  {p.times.slice(0, 4).map((t, i) => (
-                    <li key={i} className={t.realtime ? 'time realtime' : 'time'}>
-                      <span className="time-minutes">
-                        {minutesUntil(t.serviceDay, t.realtimeArrival) <= 1
-                          ? 'imminent'
-                          : `${minutesUntil(t.serviceDay, t.realtimeArrival)} min`}
-                      </span>
-                      <span className="time-clock">
-                        {formatTime(t.serviceDay, t.realtimeArrival)}
-                      </span>
-                      {t.arrivalDelay > 60 && (
-                        <span className="delay">+{Math.round(t.arrivalDelay / 60)} min</span>
-                      )}
-                      {t.occupancy && <span className="occupancy">{t.occupancy}</span>}
-                    </li>
-                  ))}
+                  {p.times.slice(0, 4).map((t, i) => {
+                    const delayed = t.realtime && t.arrivalDelay > 60;
+                    return (
+                      <li
+                        key={i}
+                        className={`time${t.realtime ? ' realtime' : ''}${delayed ? ' delayed' : ''}`}
+                      >
+                        <span className="time-minutes">
+                          {minutesUntil(t.serviceDay, t.realtimeArrival) <= 1
+                            ? 'imminent'
+                            : `${minutesUntil(t.serviceDay, t.realtimeArrival)} min`}
+                        </span>
+                        {t.occupancy && <span className="occupancy">{t.occupancy}</span>}
+                      </li>
+                    );
+                  })}
                 </ul>
               </li>
             );

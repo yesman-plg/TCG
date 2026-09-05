@@ -412,12 +412,12 @@ input {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 0.6rem;
-  padding: 0.4rem 0.7rem;
+  padding: 0.5rem 0.8rem;
   min-width: 4.5rem;
 }
 
 .time-minutes {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text);
   font-variant-numeric: tabular-nums;
@@ -428,16 +428,9 @@ input {
   font-weight: 700;
 }
 
-.time-clock {
-  color: var(--muted);
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.delay {
+/* Retard : un seul chiffre (déjà l'heure réelle recalculée), juste recoloré. */
+.time.delayed .time-minutes {
   color: var(--delay);
-  font-size: 0.72rem;
-  font-weight: 600;
 }
 
 .occupancy {
