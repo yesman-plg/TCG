@@ -5,6 +5,7 @@ import { useRoutes } from '../hooks/useRoutes';
 import { useDisruptions } from '../hooks/useDisruptions';
 import { disruptionsForRoutes } from '../utils/disruptions';
 import { formatTime, minutesUntil } from '../utils/time';
+import { naturalCompare, modeRank } from '../utils/sort';
 
 const VISIBLE_PATTERNS_DEFAULT = 8;
 
@@ -32,11 +33,27 @@ export default function DepartureBoard({ stop, isFavorite, onToggleFavorite, onC
   const sortedPatterns = useMemo(() => {
     if (!patterns) return null;
     return [...patterns].sort((a, b) => {
+      const routeA = routesById?.get(routeIdFromPatternId(a.pattern.id));
+      const routeB = routesById?.get(routeIdFromPatternId(b.pattern.id));
+
+      // 1. Trams d'abord, puis bus (au lieu d'un ordre "premier passage" qui
+      //    éparpille les lignes n'importe comment).
+      const modeCompare = modeRank(routeA?.mode) - modeRank(routeB?.mode);
+      if (modeCompare !== 0) return modeCompare;
+
+      // 2. Regroupe par numéro/lettre de ligne, dans l'ordre naturel
+      //    (A, B, C… puis C1, C2… C10, pas l'ordre alphabétique brut).
+      const nameA = routeA?.shortName || a.pattern.shortDesc || '';
+      const nameB = routeB?.shortName || b.pattern.shortDesc || '';
+      const nameCompare = naturalCompare(nameA, nameB);
+      if (nameCompare !== 0) return nameCompare;
+
+      // 3. À ligne égale (les deux sens), le sens avec le passage le plus proche en premier.
       const nextA = a.times[0]?.realtimeArrival ?? Infinity;
       const nextB = b.times[0]?.realtimeArrival ?? Infinity;
       return nextA - nextB;
     });
-  }, [patterns]);
+  }, [patterns, routesById]);
 
   const visiblePatterns = showAll
     ? sortedPatterns
