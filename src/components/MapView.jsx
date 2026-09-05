@@ -13,6 +13,23 @@ const DEFAULT_ZOOM = 14;
 const MIN_ZOOM_FOR_MARKERS = 15; // trop dézoomé = trop d'arrêts qui polluent la vue d'ensemble des lignes
 const MAX_MARKERS = 300;
 
+// Épaisseur des tracés proportionnelle au zoom : une largeur fixe en pixels
+// (comme avant) devient un amas illisible une fois dézoomé, chaque segment
+// couvrant alors une zone géographique bien plus grande.
+function weightForZoom(zoom) {
+  if (zoom <= 12) return 1.5;
+  if (zoom >= 17) return 5;
+  return 1.5 + (zoom - 12) * 0.7;
+}
+
+function applyLineWeights(polylines, zoom) {
+  const weight = weightForZoom(zoom);
+  for (const { halo, main } of polylines) {
+    halo.setStyle({ weight: weight + 2 });
+    main.setStyle({ weight });
+  }
+}
+
 /**
  * Carte interactive du réseau (fond épuré, façon "Positron", plutôt que le
  * rendu OSM standard très chargé en couleurs/labels) : affiche les arrêts
@@ -24,6 +41,7 @@ export default function MapView({ stops, onSelect }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const linesLayerRef = useRef(null);
+  const polylinesRef = useRef([]);
   const markersLayerRef = useRef(null);
   const stopsRef = useRef(stops);
   const onSelectRef = useRef(onSelect);
@@ -43,12 +61,12 @@ export default function MapView({ stops, onSelect }) {
       zoom: DEFAULT_ZOOM,
     });
     L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
       {
         attribution:
-          '&copy; <a href="https://www.esri.com">Esri</a>, HERE, Garmin, FAO, NOAA, USGS',
+          '&copy; <a href="https://www.esri.com">Esri</a>, HERE, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors',
         maxZoom: 19,
-        maxNativeZoom: 16, // le fournisseur ne détaille pas au-delà : Leaflet agrandit les tuiles z16
+        maxNativeZoom: 19,
       }
     ).addTo(map);
 
@@ -87,6 +105,7 @@ export default function MapView({ stops, onSelect }) {
     }
 
     map.on('moveend zoomend', updateMarkers);
+    map.on('zoomend', () => applyLineWeights(polylinesRef.current, map.getZoom()));
     updateMarkers();
 
     return () => {
@@ -101,6 +120,7 @@ export default function MapView({ stops, onSelect }) {
     if (!mapRef.current || !linesLayerRef.current || !lines || !routesById) return;
     const layer = linesLayerRef.current;
     layer.clearLayers();
+    const drawn = [];
     for (const line of lines) {
       const routeId = line.code.replace('_', ':');
       const route = routesById.get(routeId);
@@ -110,21 +130,22 @@ export default function MapView({ stops, onSelect }) {
       // Liseré sombre sous le tracé : certaines lignes (les Chrono, par ex.)
       // ont une couleur officielle très pâle (jaune clair) qui se fond
       // presque dans le fond de carte clair sans ce contour.
-      L.polyline(points, {
+      const halo = L.polyline(points, {
         color: '#1e293b',
-        weight: 7,
         opacity: 0.15,
         lineCap: 'round',
         lineJoin: 'round',
       }).addTo(layer);
-      L.polyline(points, {
+      const main = L.polyline(points, {
         color,
-        weight: 5,
         opacity: 1,
         lineCap: 'round',
         lineJoin: 'round',
       }).addTo(layer);
+      drawn.push({ halo, main });
     }
+    polylinesRef.current = drawn;
+    applyLineWeights(drawn, mapRef.current.getZoom());
   }, [lines, routesById]);
 
   // Les arrêts se chargent après le montage de la carte (fetch async) :
