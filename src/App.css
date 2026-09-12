@@ -61,16 +61,12 @@ input {
   margin-bottom: 1.75rem;
 }
 
-.app-header-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
+.app-header-logo {
+  display: block;
+  width: 3.25rem;
+  height: 3.25rem;
   flex-shrink: 0;
-  background: var(--accent);
-  color: var(--accent-contrast);
-  border-radius: 0.75rem;
+  border-radius: 0.72rem;
 }
 
 .app-header h1 {

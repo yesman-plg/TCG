@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Tram, Warning, Star, MagnifyingGlass } from '@phosphor-icons/react';
+import { Warning, Star, MagnifyingGlass } from '@phosphor-icons/react';
 import { useStops } from './hooks/useStops';
 import { useFavorites } from './hooks/useFavorites';
 import StopSearch from './components/StopSearch';
@@ -33,9 +33,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <span className="app-header-icon" aria-hidden="true">
-          <Tram size={24} weight="fill" />
-        </span>
+        <img className="app-header-logo" src="/icons/icon-source.svg" alt="" aria-hidden="true" />
         <div>
           <h1>TCG</h1>
           <p className="muted">Horaires TAG temps réel — réseau M (Grenoble-Alpes Métropole)</p>
