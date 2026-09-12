@@ -99,8 +99,9 @@ au dépôt GitHub).
 
 ## Icônes PWA
 
-Les icônes dans `public/icons/` sont générées depuis des SVG sources (non
-versionnés) via `sharp`. Pour les régénérer après modification du design :
+Les icônes dans `public/icons/` sont générées depuis les sources SVG
+`icon-source.svg` et `icon-maskable-source.svg` via `sharp`. Pour les
+régénérer après modification du design :
 
 ```bash
 npm install --no-save sharp

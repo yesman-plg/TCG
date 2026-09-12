@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">TCG — Transports Grenoble</title>
+  <rect width="512" height="512" rx="112" fill="#10243E"/>
+  <path d="M79 236 207 104a26 26 0 0 1 38 0l128 132h-55L226 141l-92 95H79Z" fill="#F7F4EE"/>
+  <path d="m286 198 54-56a22 22 0 0 1 32 0l91 94h-55l-52-54-16 16h-54Z" fill="#F7F4EE"/>
+  <path d="M77 265h156" fill="none" stroke="#F7F4EE" stroke-width="36" stroke-linecap="butt"/>
+  <path d="M233 265c-43 0-78 34-78 76s35 76 78 76h151" fill="none" stroke="#F7F4EE" stroke-width="36" stroke-linecap="round"/>
+  <circle cx="414" cy="417" r="28" fill="#FF5A5F"/>
+</svg>
