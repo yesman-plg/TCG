@@ -10,14 +10,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: [
         'favicon.svg',
-        'icons/icon-source.svg',
         'icons/apple-touch-icon.png',
       ],
       manifest: {
         name: 'TCG — Horaires TAG Grenoble',
         short_name: 'TCG',
         description: 'Prochains passages en temps réel du réseau M (TAG) à Grenoble.',
-        theme_color: '#10243e',
+        theme_color: '#f8fafc',
         background_color: '#f8fafc',
         display: 'standalone',
         start_url: '/',
