@@ -8,6 +8,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      includeAssets: [
+        'favicon.svg',
+        'icons/icon-source.svg',
+        'icons/apple-touch-icon.png',
+      ],
       manifest: {
         name: 'TCG — Horaires TAG Grenoble',
         short_name: 'TCG',
@@ -35,6 +40,10 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // L'application dépend du réseau : toujours récupérer la page HTML courante.
+        // Cela évite de mélanger un ancien HTML avec de nouveaux bundles hachés.
+        navigateFallback: null,
+        globIgnores: ['**/index.html', 'assets/index-CqLjmKlj.js'],
         // Les prochains passages sont du temps réel : jamais servis depuis le cache.
         runtimeCaching: [
           {
