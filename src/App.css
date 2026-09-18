@@ -222,7 +222,10 @@ input {
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   position: absolute;
-  z-index: 1000; /* au-dessus des panneaux Leaflet (z-index jusqu'à 700) */
+  /* Les contrôles Leaflet (.leaflet-top/.leaflet-bottom, zoom inclus) sont
+     eux-mêmes à z-index 1000 : il faut dépasser cette valeur pour que le
+     menu reste au-dessus quel que soit l'ordre dans le DOM. */
+  z-index: 2000;
   width: 100%;
   max-height: 17rem;
   overflow-y: auto;
