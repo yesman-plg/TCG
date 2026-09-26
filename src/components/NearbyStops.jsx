@@ -42,11 +42,13 @@ export default function NearbyStops({ stops, onSelect }) {
         </p>
         {denied && (
           <p className="muted geo-help">
-            TCG est installée comme app web (sans barre d’adresse), donc la
-            permission se change dans les réglages d’Android, pas dans un menu
-            de l’app : Paramètres → Applis → TCG → Autorisations → Position →
-            Autoriser (ou appui long sur l’icône TCG → icône ⓘ → Autorisations).
-            Vérifiez aussi que la localisation du téléphone est activée.
+            Dans Chrome : menu ⋮ → Paramètres → Paramètres des sites →
+            Position → onglet « Bloqués » → sélectionnez ce site → Autoriser
+            (l’icône TCG masque la barre d’adresse, donc ce réglage n’est pas
+            accessible directement depuis l’app). S’il y a une entrée « TCG »
+            dans Android (Paramètres → Applis), vérifiez aussi ses
+            autorisations là-bas. Vérifiez enfin que la localisation du
+            téléphone est activée.
           </p>
         )}
         <button type="button" className="retry-link" onClick={request}>
