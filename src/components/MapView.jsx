@@ -48,7 +48,7 @@ export default function MapView({ stops, onSelect }) {
   stopsRef.current = stops;
   onSelectRef.current = onSelect;
 
-  const { position, request } = useGeolocation();
+  const { position, status: geoStatus, error: geoError, request } = useGeolocation();
   const userMarkerRef = useRef(null);
   const { routesById } = useRoutes();
   const { lines } = useLinesGeometry();
@@ -183,6 +183,11 @@ export default function MapView({ stops, onSelect }) {
       >
         <MapPin size={20} weight="fill" aria-hidden="true" />
       </button>
+      {geoStatus === 'error' && (
+        <p className="map-geo-error" role="status">
+          {geoError?.message}
+        </p>
+      )}
     </div>
   );
 }

@@ -10,7 +10,7 @@ const MAX_RESULTS = 6;
  * les arrêts les plus proches triés par distance.
  */
 export default function NearbyStops({ stops, onSelect }) {
-  const { position, status, error, request } = useGeolocation();
+  const { position, status, error, denied, request } = useGeolocation();
 
   const nearest = useMemo(() => {
     if (!position || !stops) return [];
@@ -35,13 +35,23 @@ export default function NearbyStops({ stops, onSelect }) {
 
   if (status === 'error') {
     return (
-      <p className="error">
-        <Warning size={18} aria-hidden="true" />
-        Localisation impossible ({error?.message || 'permission refusée'}).{' '}
+      <div className="geo-error" role="alert">
+        <p className="error">
+          <Warning size={18} aria-hidden="true" />
+          <span>Localisation impossible : {error?.message}</span>
+        </p>
+        {denied && (
+          <p className="muted geo-help">
+            Autorisez la position pour TCG : appui long sur l’icône de l’app →
+            Infos sur l’appli → Autorisations → Position (ou, dans le navigateur,
+            icône à gauche de l’adresse → Autorisations). Vérifiez aussi que la
+            localisation du téléphone est activée.
+          </p>
+        )}
         <button type="button" className="retry-link" onClick={request}>
           Réessayer
         </button>
-      </p>
+      </div>
     );
   }
 

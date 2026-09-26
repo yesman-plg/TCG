@@ -302,6 +302,37 @@ input {
   cursor: pointer;
 }
 
+.map-geo-error {
+  position: absolute;
+  left: 0.75rem;
+  right: 4rem;
+  bottom: 0.75rem;
+  z-index: 400;
+  margin: 0;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  color: var(--error);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.geo-error .error {
+  align-items: flex-start;
+  margin: 0 0 0.4rem;
+}
+
+.geo-error .error svg {
+  flex-shrink: 0;
+  margin-top: 0.15em;
+}
+
+.geo-help {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+}
+
 .nearby-section {
   margin-bottom: 1.5rem;
 }
