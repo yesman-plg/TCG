@@ -42,10 +42,12 @@ export default function NearbyStops({ stops, onSelect }) {
         </p>
         {denied && (
           <p className="muted geo-help">
-            Autorisez la position pour TCG : appui long sur l’icône de l’app →
-            Infos sur l’appli → Autorisations → Position (ou, dans le navigateur,
-            icône à gauche de l’adresse → Autorisations). Vérifiez aussi que la
-            localisation du téléphone est activée.
+            TCG est une app web : ouvrez-la dans votre navigateur, touchez
+            l’icône à gauche de l’adresse (ou le menu ⋮ → Infos sur le site) →
+            Autorisations → Position → Autoriser. Si vous l’avez ajoutée à
+            l’écran d’accueil, l’autorisation se change aussi via appui long
+            sur son icône → Infos sur l’appli → Autorisations → Position.
+            Vérifiez aussi que la localisation du téléphone est activée.
           </p>
         )}
         <button type="button" className="retry-link" onClick={request}>
