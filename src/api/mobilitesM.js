@@ -6,6 +6,8 @@
 // Fair-use : l'API renvoie "contact us for massive usage" en cas d'abus détecté.
 // Usage personnel/perso normal (quelques requêtes par minute) : aucun souci.
 
+import { normalizeTimeSheet } from '../utils/timetable';
+
 const BASE = 'https://data.mobilites-m.fr/api';
 
 // Bbox englobant large l'aire grenobloise (Métro + Voironnais + Grésivaudan).
@@ -17,7 +19,11 @@ async function getJson(url) {
   if (!res.ok) {
     throw new Error(`Requête échouée (${res.status}) : ${url}`);
   }
-  return res.json();
+  // Certaines lignes saisonnières répondent volontairement 200 avec un corps
+  // vide hors période de circulation. C'est une fiche sans service, pas une
+  // erreur réseau ; le normaliseur de fiche la convertit en zéro direction.
+  const body = await res.text();
+  return body ? JSON.parse(body) : null;
 }
 
 /**
@@ -83,6 +89,17 @@ export async function getLinesGeometry() {
  */
 export async function getStopTimes(stopCode) {
   return getJson(`${BASE}/routers/default/index/clusters/${encodeURIComponent(stopCode)}/stoptimes`);
+}
+
+/**
+ * Récupère la fiche horaire théorique d’une ligne au moment demandé.
+ * L'API renvoie deux objets nommés "0" et "1" (un par sens) ; l'UI reçoit
+ * une structure normalisée, indépendante de ce détail historique de l'API.
+ */
+export async function getTimeSheet(routeId, time) {
+  const params = new URLSearchParams({ route: routeId, time: String(time) });
+  const data = await getJson(`${BASE}/ficheHoraires/json?${params}`);
+  return normalizeTimeSheet(data);
 }
 
 /**

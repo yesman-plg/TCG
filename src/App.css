@@ -35,6 +35,18 @@
   box-sizing: border-box;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -778,6 +790,481 @@ input {
   margin-top: 0.5rem;
   color: var(--accent);
   font-size: 0.85rem;
+}
+
+/* Fiches horaires -------------------------------------------------------- */
+
+.timetable-catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.timetable-catalog-intro {
+  padding: 0.15rem 0.15rem 0.25rem;
+}
+
+.timetable-catalog-intro h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.2rem;
+}
+
+.timetable-catalog-intro p {
+  margin: 0;
+}
+
+.timetable-catalog-card,
+.timetable-sheet {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.timetable-catalog-card {
+  padding: 1.1rem;
+}
+
+.timetable-catalog-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  color: var(--accent);
+}
+
+.timetable-catalog-card-header > div {
+  color: var(--text);
+}
+
+.timetable-catalog-card-header h2,
+.timetable-catalog-card-header p,
+.timetable-catalog-section h3 {
+  margin: 0;
+}
+
+.timetable-catalog-card-header h2 {
+  font-size: 1.18rem;
+}
+
+.timetable-catalog-card-header p {
+  margin-top: 0.3rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.timetable-catalog-section {
+  margin-top: 1.3rem;
+}
+
+.timetable-catalog-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 2.7rem;
+  margin-bottom: 0.55rem;
+}
+
+.timetable-catalog-section h3 {
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.timetable-card-vehicle,
+.timetable-section-vehicle {
+  display: block;
+  flex: none;
+  width: 7.5rem;
+  max-width: 42%;
+  height: 2.7rem;
+  object-fit: contain;
+  object-position: right center;
+}
+
+.timetable-card-vehicle {
+  width: 8.3rem;
+  height: 3.2rem;
+}
+
+.timetable-route-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.timetable-route-grid-wide {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+  max-width: 20.5rem;
+}
+
+.timetable-route {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 2.75rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 0;
+  padding: 0.2rem;
+  border: 0;
+  border-radius: 0.55rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  color: var(--accent-contrast);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.timetable-route-round {
+  border-radius: 50%;
+}
+
+.timetable-route-relay {
+  flex-direction: column;
+  gap: 0;
+  padding: 0.25rem 0 0;
+  font-size: 1.05rem;
+}
+
+.timetable-route-relay-label {
+  width: 100%;
+  padding: 0.08rem 0;
+  background: #fff;
+  color: #e9560c;
+  font-size: 0.66rem;
+  font-style: italic;
+  font-weight: 850;
+}
+
+.timetable-route-grid-wide .timetable-route {
+  width: 100%;
+  font-size: 0.92rem;
+}
+
+.timetable-route:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+}
+
+.timetable-route:focus-visible,
+.timetable-back-button:focus-visible,
+.timetable-direction-switch:focus-visible,
+.timetable-inputs input:focus-visible,
+.timetable-page-controls button:focus-visible,
+.timetable-request-error button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.timetable-sheet {
+  overflow: hidden;
+}
+
+.timetable-sheet-header {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.1rem 1rem 0.55rem;
+}
+
+.timetable-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.7rem;
+  height: 2.7rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  color: var(--text);
+  cursor: pointer;
+}
+
+.timetable-sheet-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  overflow: hidden;
+}
+
+.timetable-sheet-header h2 {
+  margin: 0;
+}
+
+.timetable-sheet-header h2 {
+  font-size: 1.2rem;
+}
+
+.timetable-route-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.55rem;
+  padding: 0.55rem 1rem 0.6rem;
+}
+
+.timetable-route-endpoint {
+  color: var(--text);
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.timetable-route-origin {
+  text-align: left;
+}
+
+.timetable-route-destination {
+  text-align: right;
+}
+
+.timetable-direction-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  color: var(--text);
+  cursor: pointer;
+}
+
+.timetable-route-track {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+  color: var(--accent);
+}
+
+.timetable-route-track span {
+  height: 2px;
+  flex: 1;
+  background: currentColor;
+}
+
+.timetable-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr);
+  gap: 0.65rem;
+  padding: 0.55rem 1rem 0.85rem;
+}
+
+.timetable-inputs label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.timetable-inputs input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.timetable-status {
+  margin: 0;
+  padding: 1.25rem 1rem;
+}
+
+.timetable-request-error {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0 1rem 1rem;
+  padding: 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--error) 40%, transparent);
+  border-radius: 0.7rem;
+  color: var(--error);
+}
+
+.timetable-request-error p {
+  flex: 1 1 12rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.timetable-request-error button {
+  min-height: 2.3rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid currentColor;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.timetable-stop-list {
+  padding: 0.2rem 0 0;
+}
+
+.timetable-journey-list {
+  position: relative;
+}
+
+.timetable-journey-list::before {
+  position: absolute;
+  top: 1.35rem;
+  bottom: 1.35rem;
+  left: 1.03rem;
+  width: 2px;
+  background: var(--accent);
+  content: '';
+}
+
+.timetable-stop-row {
+  display: grid;
+  grid-template-columns: 2.05rem minmax(0, 1fr) minmax(7.3rem, auto);
+  gap: 0.5rem;
+  align-items: center;
+  min-height: 4.7rem;
+  padding: 0.65rem 0.85rem 0.65rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.timetable-stop-row:nth-child(even) {
+  background: transparent;
+}
+
+.timetable-stop-marker {
+  display: flex;
+  position: relative;
+  z-index: 1;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+.timetable-stop-marker svg {
+  background: var(--surface);
+  border-radius: 50%;
+}
+
+.timetable-stop-arrow {
+  color: var(--muted);
+}
+
+.timetable-stop-name {
+  min-width: 0;
+}
+
+.timetable-stop-name span,
+.timetable-stop-name strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timetable-stop-name span {
+  margin-bottom: 0.1rem;
+  color: var(--muted);
+  font-size: 0.73rem;
+}
+
+.timetable-stop-name strong {
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.timetable-stop-times {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.35rem;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.timetable-stop-times time.next {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.timetable-page-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 0 1rem 0.1rem;
+}
+
+.timetable-page-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.1rem;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 60%, var(--border));
+  border-radius: 0.55rem;
+  background: var(--surface);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+.timetable-page-controls button + button {
+  border-left: 1px solid color-mix(in srgb, var(--accent) 60%, var(--border));
+}
+
+.timetable-page-controls button:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+@media (max-width: 26rem) {
+  .timetable-catalog-card {
+    padding: 0.9rem;
+  }
+
+  .timetable-stop-row {
+    grid-template-columns: 1.75rem minmax(0, 1fr) minmax(6.5rem, auto);
+    gap: 0.4rem;
+    padding-inline: 0.6rem;
+  }
+
+  .timetable-journey-list::before {
+    left: 0.86rem;
+  }
+
+  .timetable-stop-times {
+    font-size: 0.74rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -15,7 +15,7 @@ export default defineConfig({
       manifest: {
         name: 'TCG — Horaires TAG Grenoble',
         short_name: 'TCG',
-        description: 'Prochains passages en temps réel du réseau M (TAG) à Grenoble.',
+        description: 'Prochains passages et fiches horaires du réseau M (TAG) à Grenoble.',
         theme_color: '#f8fafc',
         background_color: '#f8fafc',
         display: 'standalone',
@@ -51,6 +51,12 @@ export default defineConfig({
           },
           {
             urlPattern: /\/api\/dyn\/evt\/json/,
+            handler: 'NetworkOnly',
+          },
+          {
+            // Les grilles dépendent de la date, des vacances et des mises à jour
+            // de service : ne jamais présenter une fiche horaire mise en cache.
+            urlPattern: /\/api\/ficheHoraires\/json/,
             handler: 'NetworkOnly',
           },
           {

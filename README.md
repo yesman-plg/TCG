@@ -29,6 +29,12 @@ Dépôt : **https://github.com/yesman-plg/TCG**
 - Toutes les lignes du réseau urbain ayant une perturbation active, avec le
   détail (popup) au clic
 
+**Onglet Horaires**
+- Catalogue cliquable des lignes publiques de M réso, Cars Région,
+  Transaltitude, M covoit’, téléphérique et funiculaire (hors scolaires et TER)
+- Fiche interactive par ligne : date, heure, sens, arrêts et passages prévus,
+  avec navigation entre les créneaux horaires
+
 **Alertes par ligne** : un petit indicateur apparaît sur le badge d'une ligne
 uniquement si elle a une perturbation active à cet arrêt (au lieu d'un bandeau
 global mélangeant toutes les lignes).
@@ -72,7 +78,8 @@ décodés depuis le format "polyline encodée" via
 ```
 src/
   api/mobilitesM.js       Client API Mobilités M (tous les endpoints)
-  hooks/                  useStops, useRoutes, useStopTimes, useDisruptions,
+  hooks/                  useStops, useRoutes, useStopTimes, useTimeSheet,
+                          useDisruptions,
                           useFavorites, useGeolocation, useLinesGeometry,
                           useCachedResource (cache localStorage générique)
   components/
@@ -80,6 +87,7 @@ src/
     DepartureBoard                    horaires d'un arrêt (+ picker favoris,
                                        alertes par ligne, mode compact)
     FavoriteRow                       ligne dépliable de l'onglet Favoris
+    TimetablesTab, TimetableSheet     catalogue et fiche horaire interactive
     TrafficTab, Modal
   utils/                  disruptions (filtrage/regroupement), sort (tri des
                           lignes), geo (distances), polyline (décodage), time

@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Tram, Warning, Star, MagnifyingGlass } from '@phosphor-icons/react';
+import { useEffect, useMemo, useState } from 'react';
+import { Tram, Warning, Star, MagnifyingGlass, Clock } from '@phosphor-icons/react';
 import { useStops } from './hooks/useStops';
 import { useFavorites } from './hooks/useFavorites';
 import StopSearch from './components/StopSearch';
@@ -8,6 +8,8 @@ import MapView from './components/MapView';
 import DepartureBoard from './components/DepartureBoard';
 import FavoriteRow from './components/FavoriteRow';
 import TrafficTab from './components/TrafficTab';
+import TimetablesTab from './components/TimetablesTab';
+import TimetableSheet from './components/TimetableSheet';
 import './App.css';
 
 export default function App() {
@@ -15,6 +17,13 @@ export default function App() {
   const { favorites, isFavorite, toggleFavorite, removeFavorite } = useFavorites();
   const [selectedStop, setSelectedStop] = useState(null);
   const [tab, setTab] = useState('search');
+  const [selectedTimetableRoute, setSelectedTimetableRoute] = useState(null);
+
+  useEffect(() => {
+    if (tab === 'timetables' && selectedTimetableRoute) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [tab, selectedTimetableRoute]);
 
   // Un même arrêt peut avoir plusieurs lignes favorites : on les regroupe
   // pour n'afficher qu'une seule ligne "arrêt" dépliable dans l'onglet Favoris,
@@ -62,6 +71,16 @@ export default function App() {
         >
           <Star size={16} aria-hidden="true" />
           Mes favoris
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'timetables'}
+          className={tab === 'timetables' ? 'tab active' : 'tab'}
+          onClick={() => setTab('timetables')}
+        >
+          <Clock size={16} aria-hidden="true" />
+          Horaires
         </button>
         <button
           type="button"
@@ -138,6 +157,16 @@ export default function App() {
         {tab === 'traffic' && (
           <section className="traffic-section">
             <TrafficTab />
+          </section>
+        )}
+
+        {tab === 'timetables' && (
+          <section className="timetables-section">
+            {selectedTimetableRoute ? (
+              <TimetableSheet route={selectedTimetableRoute} onBack={() => setSelectedTimetableRoute(null)} />
+            ) : (
+              <TimetablesTab onSelect={setSelectedTimetableRoute} />
+            )}
           </section>
         )}
       </main>
