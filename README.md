@@ -9,35 +9,37 @@ Dépôt : **https://github.com/yesman-plg/TCG**
 
 ## Fonctionnalités
 
-**Onglet Rechercher**
-- Recherche instantanée parmi les ~860 arrêts du réseau
-- Carte interactive (fond terrain, tracé de chaque ligne dans sa couleur
-  officielle, arrêts cliquables) — voir [Limites connues](#limites-connues)
-- Arrêts les plus proches via géolocalisation
-- Prochains passages temps réel par arrêt, toutes lignes confondues, triés
-  trams → bus Chrono → reste du réseau, avec retard (couleur), niveau
-  d'occupation et heure de passage ; rafraîchis toutes les 15s (décompte
-  affiché recalculé toutes les 5s entre deux rafraîchissements)
+Interface mobile en thème clair, 4 onglets : **Maintenant · Carte · Lignes · Trafic**.
 
-**Onglet Mes favoris**
-- Mettre un arrêt en favori propose de choisir la/les ligne(s) précise(s) à
-  suivre s'il en dessert plusieurs
-- Un arrêt = une seule ligne dépliable (menu déroulant), même avec plusieurs
-  lignes favorites à cet arrêt
+**Maintenant (accueil)**
+- Recherche instantanée parmi les ~860 arrêts et les lignes
+- « Prochain départ » en grand : favori le plus proche (ou arrêt le plus proche)
+- Favoris en cartes défilantes avec décompte en direct, gestion par « Gérer »
+- Arrêts à proximité (géolocalisation) avec temps de marche et bouton **Y aller**
 
-**Onglet Trafic**
-- Toutes les lignes du réseau urbain ayant une perturbation active, avec le
-  détail (popup) au clic
+**Y aller** : itinéraire à pied jusqu'à l'arrêt (moteur OpenTripPlanner de
+Mobilités M) tracé sur la carte, étapes, heure d'arrivée, et verdict
+« Vous l'aurez / ça va être juste / vous risquez de le rater » selon les
+prochains passages. Si l'itinéraire détaillé est indisponible, durée estimée à
+vol d'oiseau.
 
-**Onglet Horaires**
-- Catalogue cliquable des lignes publiques de M réso, Cars Région,
-  Transaltitude, M covoit’, téléphérique et funiculaire (hors scolaires et TER)
-- Fiche interactive par ligne : date, heure, sens, arrêts et passages prévus,
-  avec navigation entre les créneaux horaires
+**Fiche arrêt** : carte, prochains passages temps réel (retard, occupation,
+« puis x · y »), filtre par ligne, alertes par ligne, étoile (choix des lignes à
+suivre à cet arrêt).
 
-**Alertes par ligne** : un petit indicateur apparaît sur le badge d'une ligne
-uniquement si elle a une perturbation active à cet arrêt (au lieu d'un bandeau
-global mélangeant toutes les lignes).
+**Fiche ligne** : tracé en surbrillance, onglet *Parcours* (arrêts avec prochain
+passage, arrêt d'origine mis en avant) et onglet *Horaires* (date, heure, sens,
+navigation entre créneaux). Une ligne peut être suivie (étoile).
+
+**Carte** : réseau complet (tracés aux couleurs officielles, arrêts cliquables),
+recherche flottante, localisation.
+
+**Lignes** : catalogue filtrable (Tram, Chrono, Proximo, Flexo, Cars), état de
+perturbation, lignes suivies.
+
+**Trafic** : « Mes lignes » (favoris et lignes suivies) ou tout le réseau,
+perturbations en cours (barre de progression, temps restant) et à venir, détail
+au toucher. Le badge de l'onglet compte les lignes perturbées en ce moment.
 
 **PWA** : installable sur mobile, app shell disponible hors-ligne (les
 horaires temps réel nécessitent évidemment une connexion — jamais mis en

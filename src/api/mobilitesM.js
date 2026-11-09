@@ -103,6 +103,20 @@ export async function getTimeSheet(routeId, time) {
 }
 
 /**
+ * Calcule un itinéraire à pied entre deux points (moteur OpenTripPlanner de
+ * Mobilités M). Retourne la réponse brute ; voir utils/walk.js (parseWalkPlan).
+ */
+export async function getWalkPlan(from, to) {
+  const params = new URLSearchParams({
+    fromPlace: `${from.lat},${from.lon}`,
+    toPlace: `${to.lat},${to.lon}`,
+    mode: 'WALK',
+    numItineraries: '1',
+  });
+  return getJson(`${BASE}/routers/default/plan?${params}`);
+}
+
+/**
  * Récupère les perturbations/événements en cours sur le réseau.
  */
 export async function getDisruptions() {
