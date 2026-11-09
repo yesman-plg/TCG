@@ -1,182 +1,156 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Tram, Warning, Star, MagnifyingGlass, Clock } from '@phosphor-icons/react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useStops } from './hooks/useStops';
+import { useRoutes } from './hooks/useRoutes';
+import { useDisruptions } from './hooks/useDisruptions';
 import { useFavorites } from './hooks/useFavorites';
-import StopSearch from './components/StopSearch';
-import NearbyStops from './components/NearbyStops';
-import MapView from './components/MapView';
-import DepartureBoard from './components/DepartureBoard';
-import FavoriteRow from './components/FavoriteRow';
+import { useFavoriteLines } from './hooks/useFavoriteLines';
+import { useGeolocation } from './hooks/useGeolocation';
+import { activeDisruptionsByLine } from './utils/disruptions';
+import { classifyDisruption } from './utils/traffic';
+import { distanceMeters } from './utils/geo';
+import { AppContext } from './context/AppContext';
+import BottomNav from './components/BottomNav';
+import HomeTab from './components/HomeTab';
+import MapTab from './components/MapTab';
+import LinesTab from './components/LinesTab';
 import TrafficTab from './components/TrafficTab';
-import TimetablesTab from './components/TimetablesTab';
-import TimetableSheet from './components/TimetableSheet';
+import StopScreen from './components/StopScreen';
+import WalkScreen from './components/WalkScreen';
+import LineScreen from './components/LineScreen';
 import './App.css';
+
+// Seules les lignes urbaines "SEM" ont des arrêts recherchables dans l'app :
+// on s'y limite pour le compteur de perturbations.
+const APP_AGENCY = 'SEM';
+const NEAREST_COUNT = 8;
 
 export default function App() {
   const { stops, error: stopsError } = useStops();
-  const { favorites, isFavorite, toggleFavorite, removeFavorite } = useFavorites();
-  const [selectedStop, setSelectedStop] = useState(null);
-  const [tab, setTab] = useState('search');
-  const [selectedTimetableRoute, setSelectedTimetableRoute] = useState(null);
+  const { routes, routesById } = useRoutes();
+  const { disruptions } = useDisruptions();
+  const favoritesApi = useFavorites();
+  const favoriteLinesApi = useFavoriteLines();
+  const { position, status: geoStatus, error: geoError, request: requestLocation } = useGeolocation();
 
+  const [tab, setTab] = useState('home');
+  // Pile d'écrans ouverts par-dessus l'onglet courant (arrêt, itinéraire, ligne).
+  const [stack, setStack] = useState([]);
+  const stackRef = useRef(stack);
   useEffect(() => {
-    if (tab === 'timetables' && selectedTimetableRoute) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [tab, selectedTimetableRoute]);
+    stackRef.current = stack;
+  }, [stack]);
 
-  // Un même arrêt peut avoir plusieurs lignes favorites : on les regroupe
-  // pour n'afficher qu'une seule ligne "arrêt" dépliable dans l'onglet Favoris,
-  // au lieu d'une ligne par ligne de transport.
-  const favoriteGroups = useMemo(() => {
-    const groups = new Map();
-    for (const f of favorites) {
-      if (!groups.has(f.code)) {
-        groups.set(f.code, { code: f.code, name: f.name, city: f.city, routes: [] });
-      }
-      groups.get(f.code).routes.push(f);
+  // Si la permission est déjà accordée, on se géolocalise sans rien demander.
+  useEffect(() => {
+    let cancelled = false;
+    navigator.permissions
+      ?.query({ name: 'geolocation' })
+      .then((result) => {
+        if (!cancelled && result.state === 'granted') requestLocation();
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [requestLocation]);
+
+  // Le bouton retour du navigateur / du téléphone ferme l'écran du dessus.
+  useEffect(() => {
+    function onPopState() {
+      setStack((s) => (s.length > 0 ? s.slice(0, -1) : s));
     }
-    return [...groups.values()];
-  }, [favorites]);
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const push = useCallback((screen) => {
+    window.history.pushState({ screen: screen.type }, '');
+    setStack((s) => [...s, screen]);
+  }, []);
+
+  const nav = useMemo(
+    () => ({
+      openStop: (stop) => push({ type: 'stop', stop }),
+      openWalk: (stop) => push({ type: 'walk', stop }),
+      openLine: (route, stop = null) => push({ type: 'line', route, stop }),
+      back: () => window.history.back(),
+      // Depuis l'itinéraire : si la fiche de l'arrêt est juste dessous, on y revient
+      // simplement ; sinon (« Y aller » lancé depuis l'accueil) on la met à la place.
+      replaceWithStop: (stop) => {
+        const below = stackRef.current.at(-2);
+        if (below?.type === 'stop' && below.stop.code === stop.code) {
+          window.history.back();
+        } else {
+          setStack((s) => [...s.slice(0, -1), { type: 'stop', stop }]);
+        }
+      },
+    }),
+    [push],
+  );
+
+  const nearestStops = useMemo(() => {
+    if (!position || !stops) return [];
+    return stops
+      .map((s) => ({ ...s, distance: distanceMeters(position.lat, position.lon, s.lat, s.lon) }))
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, NEAREST_COUNT);
+  }, [position, stops]);
+
+  // Lignes urbaines avec une perturbation en cours (badge de l'onglet Trafic, état des lignes).
+  const disruptedLineIds = useMemo(() => {
+    if (!disruptions || !routesById) return [];
+    const now = new Date();
+    const ids = [];
+    for (const [id, alerts] of activeDisruptionsByLine(disruptions)) {
+      if (!id.startsWith(`${APP_AGENCY}:`) || !routesById.has(id)) continue;
+      // Les perturbations annoncées pour plus tard ne comptent pas comme « en cours ».
+      if (alerts.some((a) => classifyDisruption(a, now).status === 'ongoing')) ids.push(id);
+    }
+    return ids;
+  }, [disruptions, routesById]);
+
+  const context = useMemo(
+    () => ({
+      stops,
+      stopsError,
+      routes,
+      routesById,
+      disruptions,
+      disruptedLineIds,
+      ...favoritesApi,
+      ...favoriteLinesApi,
+      position,
+      geoStatus,
+      geoError,
+      requestLocation,
+      nearestStops,
+      nav,
+    }),
+    [
+      stops, stopsError, routes, routesById, disruptions, disruptedLineIds,
+      favoritesApi, favoriteLinesApi, position, geoStatus, geoError,
+      requestLocation, nearestStops, nav,
+    ],
+  );
+
+  const top = stack.at(-1);
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <span className="app-header-icon" aria-hidden="true">
-          <Tram size={24} weight="fill" />
-        </span>
-        <div>
-          <h1>TCG</h1>
-          <p className="muted">Horaires TAG temps réel — réseau M (Grenoble-Alpes Métropole)</p>
-        </div>
-      </header>
+    <AppContext.Provider value={context}>
+      <div className="app">
+        {tab === 'home' && <HomeTab />}
+        {tab === 'map' && <MapTab />}
+        {tab === 'lines' && <LinesTab />}
+        {tab === 'traffic' && <TrafficTab />}
 
-      <nav className="tabs" role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'search'}
-          className={tab === 'search' ? 'tab active' : 'tab'}
-          onClick={() => setTab('search')}
-        >
-          <MagnifyingGlass size={16} aria-hidden="true" />
-          Rechercher
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'favorites'}
-          className={tab === 'favorites' ? 'tab active' : 'tab'}
-          onClick={() => setTab('favorites')}
-        >
-          <Star size={16} aria-hidden="true" />
-          Mes favoris
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'timetables'}
-          className={tab === 'timetables' ? 'tab active' : 'tab'}
-          onClick={() => setTab('timetables')}
-        >
-          <Clock size={16} aria-hidden="true" />
-          Horaires
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'traffic'}
-          className={tab === 'traffic' ? 'tab active' : 'tab'}
-          onClick={() => setTab('traffic')}
-        >
-          <Warning size={16} aria-hidden="true" />
-          Trafic
-        </button>
-      </nav>
+        <BottomNav tab={tab} onChange={setTab} alertCount={disruptedLineIds.length} />
 
-      <main>
-        {stopsError && (
-          <p className="error">
-            <Warning size={18} aria-hidden="true" />
-            Impossible de charger la liste des arrêts. Vérifie ta connexion et recharge la page.
-          </p>
+        {top?.type === 'stop' && <StopScreen key={`stop-${top.stop.code}`} stop={top.stop} />}
+        {top?.type === 'walk' && <WalkScreen key={`walk-${top.stop.code}`} stop={top.stop} />}
+        {top?.type === 'line' && (
+          <LineScreen key={`line-${top.route.id}`} route={top.route} stop={top.stop} />
         )}
-
-        {tab === 'search' && (
-          <>
-            <section className="search-section">
-              <StopSearch stops={stops} onSelect={setSelectedStop} />
-            </section>
-
-            {!selectedStop && (
-              <section className="map-section">
-                <MapView stops={stops} onSelect={setSelectedStop} />
-              </section>
-            )}
-
-            {!selectedStop && (
-              <section className="nearby-section">
-                <NearbyStops stops={stops} onSelect={setSelectedStop} />
-              </section>
-            )}
-
-            {selectedStop && (
-              <section className="selected-section">
-                <DepartureBoard
-                  stop={selectedStop}
-                  isFavorite={isFavorite}
-                  onToggleFavorite={toggleFavorite}
-                  onClose={() => setSelectedStop(null)}
-                />
-              </section>
-            )}
-          </>
-        )}
-
-        {tab === 'favorites' && (
-          <section className="favorites-section">
-            {favorites.length === 0 ? (
-              <p className="muted">
-                Aucun favori pour l'instant. Va dans "Rechercher", choisis un arrêt et clique sur
-                ★ pour l'ajouter.
-              </p>
-            ) : (
-              <div className="favorites-list">
-                {favoriteGroups.map((group) => (
-                  <FavoriteRow
-                    key={group.code}
-                    group={group}
-                    onRemoveRoute={(routeId) => removeFavorite(group.code, routeId)}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {tab === 'traffic' && (
-          <section className="traffic-section">
-            <TrafficTab />
-          </section>
-        )}
-
-        {tab === 'timetables' && (
-          <section className="timetables-section">
-            {selectedTimetableRoute ? (
-              <TimetableSheet route={selectedTimetableRoute} onBack={() => setSelectedTimetableRoute(null)} />
-            ) : (
-              <TimetablesTab onSelect={setSelectedTimetableRoute} />
-            )}
-          </section>
-        )}
-      </main>
-
-      <footer className="app-footer">
-        <p className="muted">
-          Données : Mobilités M / SMMAG (mobilites-m.fr) — licence ODbL. Projet personnel non
-          affilié à l'exploitant du réseau.
-        </p>
-      </footer>
-    </div>
+      </div>
+    </AppContext.Provider>
   );
 }
